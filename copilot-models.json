@@ -1,0 +1,163 @@
+{
+  "provider": "copilot",
+  "generatedAt": "2026-04-22",
+  "purpose": "Local registry for GitHub-hosted Copilot model validation and UX hints.",
+  "notes": [
+    "Use this file as a cache, not as the sole source of truth.",
+    "GitHub model availability can vary by client, plan, region, and release timing.",
+    "Do not use this file to reject BYOK/custom provider models; those model IDs are user-defined.",
+    "The model IDs below are normalized CLI-friendly IDs derived from GitHub model names and examples."
+  ],
+  "sources": [
+    {
+      "url": "https://docs.github.com/en/copilot/reference/ai-models/supported-models",
+      "description": "Supported AI models in GitHub Copilot"
+    },
+    {
+      "url": "https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference",
+      "description": "GitHub Copilot CLI programmatic reference"
+    }
+  ],
+  "models": [
+    {
+      "id": "gpt-4.1",
+      "displayName": "GPT-4.1",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "gpt-5-mini",
+      "displayName": "GPT-5 mini",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "gpt-5.2",
+      "displayName": "GPT-5.2",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "gpt-5.2-codex",
+      "displayName": "GPT-5.2-Codex",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "gpt-5.3-codex",
+      "displayName": "GPT-5.3-Codex",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "gpt-5.4",
+      "displayName": "GPT-5.4",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "gpt-5.4-mini",
+      "displayName": "GPT-5.4 mini",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "claude-haiku-4.5",
+      "displayName": "Claude Haiku 4.5",
+      "provider": "Anthropic",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "claude-opus-4.5",
+      "displayName": "Claude Opus 4.5",
+      "provider": "Anthropic",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "claude-opus-4.6",
+      "displayName": "Claude Opus 4.6",
+      "provider": "Anthropic",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "claude-opus-4.7",
+      "displayName": "Claude Opus 4.7",
+      "provider": "Anthropic",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "claude-sonnet-4",
+      "displayName": "Claude Sonnet 4",
+      "provider": "Anthropic",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "claude-sonnet-4.5",
+      "displayName": "Claude Sonnet 4.5",
+      "provider": "Anthropic",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "claude-sonnet-4.6",
+      "displayName": "Claude Sonnet 4.6",
+      "provider": "Anthropic",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "gemini-2.5-pro",
+      "displayName": "Gemini 2.5 Pro",
+      "provider": "Google",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "gemini-3-flash",
+      "displayName": "Gemini 3 Flash",
+      "provider": "Google",
+      "releaseStatus": "Public preview",
+      "supportsCli": true
+    },
+    {
+      "id": "gemini-3.1-pro",
+      "displayName": "Gemini 3.1 Pro",
+      "provider": "Google",
+      "releaseStatus": "Public preview",
+      "supportsCli": true
+    },
+    {
+      "id": "grok-code-fast-1",
+      "displayName": "Grok Code Fast 1",
+      "provider": "xAI",
+      "releaseStatus": "GA",
+      "supportsCli": true
+    },
+    {
+      "id": "raptor-mini",
+      "displayName": "Raptor mini",
+      "provider": "GitHub fine-tuned",
+      "releaseStatus": "Public preview",
+      "supportsCli": true
+    },
+    {
+      "id": "goldeneye",
+      "displayName": "Goldeneye",
+      "provider": "GitHub fine-tuned",
+      "releaseStatus": "Public preview",
+      "supportsCli": true
+    }
+  ]
+}

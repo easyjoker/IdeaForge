@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+
+# PowerShell
+*.psd1
+*.psm1
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# .NET build outputs
+bin/
+obj/
+
+# Local outputs
+copilot-output.txt
+codex-output.txt
+copilot-session-*.md
