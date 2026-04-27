@@ -25,7 +25,7 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
                 a.provider, a.model, a.session_id, a.system_prompt, a.last_used_at, a.session_updated_at
             from public.employees e
             join public.persons p on p.id = e.person_id
-            join public.agent_data a on a.employee_id = e.id
+            join public.agent_data a on a.person_id = p.id
             order by p.display_name;
             """;
 
@@ -51,7 +51,7 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
                 a.provider, a.model, a.session_id, a.system_prompt, a.last_used_at, a.session_updated_at
             from public.employees e
             join public.persons p on p.id = e.person_id
-            join public.agent_data a on a.employee_id = e.id
+            join public.agent_data a on a.person_id = p.id
             where e.id = @id;
             """;
 
@@ -72,7 +72,7 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
                 a.provider, a.model, a.session_id, a.system_prompt, a.last_used_at, a.session_updated_at
             from public.employees e
             join public.persons p on p.id = e.person_id
-            join public.agent_data a on a.employee_id = e.id
+            join public.agent_data a on a.person_id = p.id
             where e.key = @key;
             """;
 
@@ -126,11 +126,11 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
         const string agentDataSql = """
             insert into public.agent_data
             (
-                employee_id, provider, model, session_id, system_prompt, last_used_at, session_updated_at
+                person_id, provider, model, session_id, system_prompt, last_used_at, session_updated_at
             )
             values
             (
-                @employee_id, @provider, @model, @session_id, @system_prompt, @last_used_at, @session_updated_at
+                @person_id, @provider, @model, @session_id, @system_prompt, @last_used_at, @session_updated_at
             );
             """;
 
@@ -197,7 +197,7 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
                 system_prompt = @system_prompt,
                 last_used_at = @last_used_at,
                 session_updated_at = @session_updated_at
-            where employee_id = @employee_id;
+            where person_id = @person_id;
             """;
 
         await using (var agentDataCommand = new NpgsqlCommand(agentDataSql, connection, transaction))
@@ -315,7 +315,7 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
 
     private static void AddAgentDataParameters(NpgsqlCommand command, AgentData agentData)
     {
-        command.Parameters.AddWithValue("employee_id", agentData.EmployeeId);
+        command.Parameters.AddWithValue("person_id", agentData.PersonId);
         command.Parameters.AddWithValue("provider", (short)agentData.Provider);
         command.Parameters.AddWithValue("model", agentData.Model);
         command.Parameters.AddWithValue("session_id", (object?)agentData.SessionId ?? DBNull.Value);
@@ -357,7 +357,7 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
             },
             AgentData = new AgentData
             {
-                EmployeeId = reader.GetGuid(reader.GetOrdinal("employee_id")),
+                PersonId = reader.GetGuid(reader.GetOrdinal("person_id")),
                 Provider = (AgentProviderKind)reader.GetInt16(reader.GetOrdinal("provider")),
                 Model = reader.GetString(reader.GetOrdinal("model")),
                 SessionId = reader.IsDBNull(reader.GetOrdinal("session_id")) ? null : reader.GetString(reader.GetOrdinal("session_id")),

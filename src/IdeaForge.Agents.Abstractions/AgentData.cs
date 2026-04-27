@@ -2,7 +2,7 @@ namespace IdeaForge.Agents.Abstractions;
 
 public sealed class AgentData
 {
-    public Guid EmployeeId { get; set; }
+    public Guid PersonId { get; set; }
 
     public AgentProviderKind Provider { get; set; }
 

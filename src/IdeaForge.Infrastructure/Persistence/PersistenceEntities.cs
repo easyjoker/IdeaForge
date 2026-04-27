@@ -42,7 +42,7 @@ public sealed class EmployeeEntity
 
 public sealed class AgentDataEntity
 {
-    public Guid EmployeeId { get; set; }
+    public Guid PersonId { get; set; }
 
     public short Provider { get; set; }
 

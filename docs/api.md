@@ -27,7 +27,12 @@ Example body:
   "kind": 2,
   "displayName": "Docs Writer",
   "description": "AI person that writes and maintains project documentation.",
-  "metadata": {}
+  "metadata": {},
+  "agentSettings": {
+    "provider": 2,
+    "model": "gpt-5.4",
+    "systemPrompt": "Answer in concise Traditional Chinese."
+  }
 }
 ```
 
@@ -35,6 +40,8 @@ Person kind values:
 
 - `1` = `Human`
 - `2` = `AI`
+
+The `agentSettings` object is used only when `kind` is `2` (`AI`). If omitted for an AI person, the API creates default Codex settings with `gpt-5.4`.
 
 ## List People
 
@@ -75,25 +82,7 @@ Example body for a human person:
 }
 ```
 
-Example body for an AI person:
-
-```json
-{
-  "personId": "00000000-0000-0000-0000-000000000000",
-  "key": "docs-writer",
-  "role": "Documentation Agent",
-  "mission": "Keep ideaForge documentation accurate and useful.",
-  "specialties": ["documentation", "api", "developer-experience"],
-  "metadata": {},
-  "agentSettings": {
-    "provider": 2,
-    "model": "gpt-5.4",
-    "systemPrompt": "Answer in concise Traditional Chinese."
-  }
-}
-```
-
-The `agentSettings` object is only used for AI people.
+AI provider/model settings are configured on the person profile, not on the employee role.
 
 ## List Employees
 
@@ -111,7 +100,7 @@ Endpoint:
 DELETE /api/employees/{id}
 ```
 
-Deleting an employee role also removes linked AI agent data and execution history through database cascade rules. The person record remains available.
+Deleting an employee role removes execution history for that role through database cascade rules. The person record and person-level AI settings remain available.
 
 ## Create Agent
 

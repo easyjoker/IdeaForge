@@ -30,6 +30,7 @@ export type PersonDto = {
   displayName: string;
   description?: string;
   metadata: Record<string, string>;
+  agentSettings?: AgentDataDto;
   createdAtUtc: string;
   updatedAtUtc: string;
 };
@@ -75,7 +76,6 @@ export type EmployeeDirectoryDto = {
   status: AgentStatus;
   specialties: string[];
   metadata: Record<string, string>;
-  agentSettings?: AgentSettingsDto;
   createdAtUtc: string;
   updatedAtUtc: string;
 };
@@ -85,6 +85,7 @@ export type CreatePersonRequest = {
   displayName: string;
   description?: string;
   metadata: Record<string, string>;
+  agentSettings?: UpsertAgentSettingsRequest;
 };
 
 export type UpdatePersonRequest = CreatePersonRequest;
@@ -102,7 +103,6 @@ export type CreateEmployeeRequest = {
   mission?: string;
   specialties: string[];
   metadata: Record<string, string>;
-  agentSettings?: UpsertAgentSettingsRequest;
 };
 
 export type UpdateEmployeeRequest = {
@@ -112,7 +112,6 @@ export type UpdateEmployeeRequest = {
   status: AgentStatus;
   specialties: string[];
   metadata: Record<string, string>;
-  agentSettings?: UpsertAgentSettingsRequest;
 };
 
 export type CreateAgentProfileRequest = {

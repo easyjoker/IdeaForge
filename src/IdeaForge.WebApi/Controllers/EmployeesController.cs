@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IdeaForge.WebApi.Controllers;
 
 /// <summary>
-/// Manage employee work assignments and optional AI agent settings.
+/// Manage employee work assignments.
 /// </summary>
 [ApiController]
 [Route("api/employees")]
@@ -41,7 +41,7 @@ public sealed class EmployeesController : ControllerBase
     }
 
     /// <summary>
-    /// Create an employee record for a person. Include agentSettings only when the selected person is AI.
+    /// Create an employee record for a person. AI settings are configured on the person profile.
     /// </summary>
     [HttpPost]
     [ProducesResponseType<EmployeeDirectoryDto>(StatusCodes.Status201Created)]
@@ -72,7 +72,7 @@ public sealed class EmployeesController : ControllerBase
     }
 
     /// <summary>
-    /// Update employee work assignment and optional AI agent settings.
+    /// Update employee work assignment.
     /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType<EmployeeDirectoryDto>(StatusCodes.Status200OK)]
@@ -100,7 +100,7 @@ public sealed class EmployeesController : ControllerBase
     }
 
     /// <summary>
-    /// Delete an employee assignment. Related AI agent data and execution history are removed by database cascade rules.
+    /// Delete an employee assignment. Related execution history is removed by database cascade rules.
     /// </summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

@@ -67,15 +67,15 @@ public sealed class AgentProfileService : IAgentProfileService
             },
             AgentData = new AgentData
             {
-                EmployeeId = Guid.Empty,
-                Provider = request.Provider,
+                PersonId = Guid.Empty,
+                Provider = ResolveProvider(request.Provider, existing: null),
                 Model = string.IsNullOrWhiteSpace(request.Model) ? "gpt-5.4" : request.Model.Trim(),
                 SystemPrompt = request.SystemPrompt
             }
         };
 
         profile.Employee.PersonId = profile.Person.Id;
-        profile.AgentData.EmployeeId = profile.Employee.Id;
+        profile.AgentData.PersonId = profile.Person.Id;
 
         var created = await _repository.AddAsync(profile, cancellationToken);
         return Map(created);
@@ -103,7 +103,7 @@ public sealed class AgentProfileService : IAgentProfileService
         existing.Employee.Metadata = new Dictionary<string, string>(request.Metadata, StringComparer.OrdinalIgnoreCase);
         existing.Employee.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
-        existing.AgentData.Provider = request.Provider;
+        existing.AgentData.Provider = ResolveProvider(request.Provider, existing.AgentData.Provider);
         existing.AgentData.Model = string.IsNullOrWhiteSpace(request.Model) ? existing.AgentData.Model : request.Model.Trim();
         existing.AgentData.SystemPrompt = request.SystemPrompt;
 
@@ -121,7 +121,7 @@ public sealed class AgentProfileService : IAgentProfileService
         var execution = new AgentExecutionRecord
         {
             EmployeeId = employeeId,
-            Provider = request.Provider,
+            Provider = ResolveProvider(request.Provider, profile.AgentData.Provider),
             Model = string.IsNullOrWhiteSpace(request.Model) ? profile.AgentData.Model : request.Model.Trim(),
             SessionId = string.IsNullOrWhiteSpace(request.SessionId) ? null : request.SessionId.Trim(),
             Prompt = request.Prompt.Trim(),
@@ -224,6 +224,13 @@ public sealed class AgentProfileService : IAgentProfileService
 
     private static string? NormalizeOptional(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static AgentProviderKind ResolveProvider(AgentProviderKind requested, AgentProviderKind? existing) =>
+        requested is AgentProviderKind.Copilot or AgentProviderKind.Codex
+            ? requested
+            : existing is AgentProviderKind.Copilot or AgentProviderKind.Codex
+                ? existing.Value
+                : AgentProviderKind.Codex;
 
     private static AgentExecutionDto Map(AgentExecutionRecord execution) =>
         new()

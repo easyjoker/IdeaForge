@@ -72,6 +72,9 @@ type PersonFormValues = {
   kind: PersonKind;
   displayName: string;
   description?: string;
+  provider?: AgentProviderKind;
+  model?: string;
+  systemPrompt?: string;
 };
 
 type EmployeeFormValues = {
@@ -81,9 +84,6 @@ type EmployeeFormValues = {
   mission?: string;
   status?: AgentStatus;
   specialtiesText?: string;
-  provider?: AgentProviderKind;
-  model?: string;
-  systemPrompt?: string;
 };
 
 type CompanyFormValues = {
@@ -283,6 +283,8 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
   const [open, setOpen] = useState(false);
   const [editingPerson, setEditingPerson] = useState<PersonDirectoryDto>();
   const [personForm] = Form.useForm<PersonFormValues>();
+  const watchedPersonKind = Form.useWatch("kind", personForm);
+  const personFormIsAi = watchedPersonKind === PersonKind.Ai;
   const personSaveInFlightRef = useRef(false);
 
   useEffect(() => {
@@ -314,7 +316,8 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
           kind: values.kind,
           displayName: values.displayName,
           description: emptyToUndefined(values.description),
-          metadata: editingPerson.metadata ?? {}
+          metadata: editingPerson.metadata ?? {},
+          agentSettings: values.kind === PersonKind.Ai ? buildAgentSettings(values) : undefined
         });
         messageApi.success("Person updated");
       } else {
@@ -322,7 +325,8 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
           kind: values.kind,
           displayName: values.displayName,
           description: emptyToUndefined(values.description),
-          metadata: {}
+          metadata: {},
+          agentSettings: values.kind === PersonKind.Ai ? buildAgentSettings(values) : undefined
         });
         messageApi.success("Person created");
       }
@@ -366,10 +370,15 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
         ? {
             kind: person.kind,
             displayName: person.displayName,
-            description: person.description
+            description: person.description,
+            provider: person.agentSettings?.provider ?? AgentProviderKind.Codex,
+            model: person.agentSettings?.model ?? "gpt-5.4",
+            systemPrompt: person.agentSettings?.systemPrompt
           }
         : {
-            kind: PersonKind.Human
+            kind: PersonKind.Human,
+            provider: AgentProviderKind.Codex,
+            model: "gpt-5.4"
           }
     );
     setOpen(true);
@@ -428,6 +437,18 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
               render: (_, record) => renderPersonKind(record.kind)
             },
             {
+              title: "AI Settings",
+              render: (_, record) =>
+                record.agentSettings ? (
+                  <Space>
+                    <Tag>{providerLabel[record.agentSettings.provider]}</Tag>
+                    <Text code>{record.agentSettings.model}</Text>
+                  </Space>
+                ) : (
+                  <Text type="secondary">Not an AI person</Text>
+                )
+            },
+            {
               title: "Action",
               render: (_, record) => (
                 <Space>
@@ -453,12 +474,12 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
         />
       </Card>
 
-      <Modal title={editingPerson ? "Update person" : "Create person"} open={open} onCancel={() => setOpen(false)} footer={null} destroyOnHidden>
+      <Modal title={editingPerson ? "Update person" : "Create person"} open={open} onCancel={() => setOpen(false)} footer={null} destroyOnHidden width={720}>
         <Form form={personForm} layout="vertical" onFinish={savePerson}>
           <Form.Item
             name="kind"
             label="Person Type"
-            extra="AI people can receive LLM agent settings later in the employee role page."
+            extra="AI people store LLM agent settings on the person profile."
             rules={[{ required: true, message: "Person type is required" }]}
           >
             <Select
@@ -474,6 +495,24 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
           <Form.Item name="description" label="Description">
             <Input.TextArea rows={3} placeholder="Person profile, responsibility, or background." />
           </Form.Item>
+          {personFormIsAi && (
+            <Card size="small" title="AI Agent Settings" className="embedded-card">
+              <Form.Item name="provider" label="Provider" rules={[{ required: true, message: "Provider is required for AI people" }]}>
+                <Select
+                  options={[
+                    { label: "Copilot", value: AgentProviderKind.Copilot },
+                    { label: "Codex", value: AgentProviderKind.Codex }
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item name="model" label="Model">
+                <Input placeholder="gpt-5.4" />
+              </Form.Item>
+              <Form.Item name="systemPrompt" label="System Prompt">
+                <Input.TextArea rows={3} placeholder="Optional instructions for this AI person." />
+              </Form.Item>
+            </Card>
+          )}
           <Button type="primary" htmlType="submit" block loading={savingPerson} disabled={savingPerson}>
             {editingPerson ? "Update Person" : "Create Person"}
           </Button>
@@ -493,7 +532,6 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
   const [employeeForm] = Form.useForm<EmployeeFormValues>();
   const watchedPersonId = Form.useWatch("personId", employeeForm);
   const selectedPerson = editingEmployee?.person ?? people.find((person) => person.id === watchedPersonId);
-  const selectedPersonIsAi = selectedPerson?.kind === PersonKind.Ai;
 
   useEffect(() => {
     void loadDirectory();
@@ -521,8 +559,7 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
           mission: emptyToUndefined(values.mission),
           status: values.status ?? AgentStatus.Active,
           specialties: parseList(values.specialtiesText),
-          metadata: editingEmployee.metadata ?? {},
-          agentSettings: selectedPersonIsAi ? buildAgentSettings(values) : undefined
+          metadata: editingEmployee.metadata ?? {}
         });
         messageApi.success("Employee role updated");
       } else {
@@ -532,8 +569,7 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
           role: emptyToUndefined(values.role),
           mission: emptyToUndefined(values.mission),
           specialties: parseList(values.specialtiesText),
-          metadata: {},
-          agentSettings: selectedPersonIsAi ? buildAgentSettings(values) : undefined
+          metadata: {}
         });
         messageApi.success("Employee role created");
       }
@@ -577,15 +613,10 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
             role: employee.role,
             mission: employee.mission,
             status: employee.status,
-            specialtiesText: employee.specialties.join(", "),
-            provider: employee.agentSettings?.provider ?? AgentProviderKind.Codex,
-            model: employee.agentSettings?.model ?? "gpt-5.4",
-            systemPrompt: employee.agentSettings?.systemPrompt
+            specialtiesText: employee.specialties.join(", ")
           }
         : {
-            status: AgentStatus.Active,
-            provider: AgentProviderKind.Codex,
-            model: "gpt-5.4"
+            status: AgentStatus.Active
           }
     );
     setOpen(true);
@@ -653,13 +684,13 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
             {
               title: "AI Settings",
               render: (_, record) =>
-                record.agentSettings ? (
+                record.person.agentSettings ? (
                   <Space>
-                    <Tag>{providerLabel[record.agentSettings.provider]}</Tag>
-                    <Text code>{record.agentSettings.model}</Text>
+                    <Tag>{providerLabel[record.person.agentSettings.provider]}</Tag>
+                    <Text code>{record.person.agentSettings.model}</Text>
                   </Space>
                 ) : (
-                  <Text type="secondary">Human role</Text>
+                  <Text type="secondary">No person-level AI settings</Text>
                 )
             },
             {
@@ -675,7 +706,7 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
                   </Button>
                   <Popconfirm
                     title="Delete employee role"
-                    description="AI agent data and execution history for this employee will also be deleted."
+                    description="Execution history for this employee role will also be deleted. Person-level AI settings remain."
                     okText="Delete"
                     cancelText="Cancel"
                     okButtonProps={{ danger: true }}
@@ -718,26 +749,13 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
             <Input placeholder="documentation, api, review" />
           </Form.Item>
 
-          {selectedPersonIsAi && (
-            <Card size="small" title="AI Agent Settings" className="embedded-card">
-              <Form.Item name="provider" label="Provider" rules={[{ required: true, message: "Provider is required for AI people" }]}>
-                <Select
-                  options={[
-                    { label: "Copilot", value: AgentProviderKind.Copilot },
-                    { label: "Codex", value: AgentProviderKind.Codex }
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item name="model" label="Model">
-                <Input placeholder="gpt-5.4" />
-              </Form.Item>
-              <Form.Item name="systemPrompt" label="System Prompt">
-                <Input.TextArea rows={3} placeholder="Optional instructions for this AI employee." />
-              </Form.Item>
+          {selectedPerson?.kind === PersonKind.Ai && (
+            <Card size="small" className="embedded-card">
+              <Text type="secondary">AI provider/model settings are configured on the person profile.</Text>
             </Card>
           )}
 
-          {!selectedPersonIsAi && selectedPerson && (
+          {selectedPerson?.kind === PersonKind.Human && (
             <Card size="small" className="embedded-card">
               <Text type="secondary">This is a human person, so no AI provider/model settings are required.</Text>
             </Card>
@@ -1524,7 +1542,7 @@ function renderPersonKind(kind: PersonKind) {
   return <Tag color={personKindColor[kind]}>{personKindLabel[kind]}</Tag>;
 }
 
-function buildAgentSettings(values: EmployeeFormValues) {
+function buildAgentSettings(values: PersonFormValues) {
   return {
     provider: values.provider ?? AgentProviderKind.Codex,
     model: emptyToUndefined(values.model),

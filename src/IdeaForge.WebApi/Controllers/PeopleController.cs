@@ -41,7 +41,7 @@ public sealed class PeopleController : ControllerBase
     }
 
     /// <summary>
-    /// Create a person. Use kind 1 for Human and 2 for AI.
+    /// Create a person. Use kind 1 for Human and 2 for AI. Include agentSettings only for AI people.
     /// </summary>
     [HttpPost]
     [ProducesResponseType<PersonDirectoryDto>(StatusCodes.Status201Created)]
@@ -67,7 +67,7 @@ public sealed class PeopleController : ControllerBase
     }
 
     /// <summary>
-    /// Update a person. Changing an AI person to Human removes AI agent settings from linked employee records.
+    /// Update a person. Changing an AI person to Human removes person-level AI agent settings.
     /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType<PersonDirectoryDto>(StatusCodes.Status200OK)]

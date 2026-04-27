@@ -84,9 +84,9 @@ http://localhost:5246/swagger
 
 ideaForge separates company personnel and agents into three concerns:
 
-- `person`: stable person identity, such as human/AI kind, display name, description, and metadata
+- `person`: stable person identity, such as human/AI kind, display name, description, metadata, and AI settings when applicable
 - `employee`: company work assignment, such as employee key, role, mission, specialties, and lifecycle status
-- `agent_data`: AI-only runtime configuration, such as provider, model, session id, and system prompt
+- `agent_data`: person-level AI runtime configuration, such as provider, model, session id, and system prompt
 - `agent_executions`: historical records for completed prompt executions
 
 This lets human and AI employees share the same personnel model while keeping LLM runtime state separate and optional.
@@ -100,8 +100,8 @@ Client delivery settings use this hierarchy:
 ## Main API Flow
 
 1. Create a person with `POST /api/people`.
-2. Set that person's employee role with `POST /api/employees`.
-3. Include `agentSettings` only when the selected person is AI.
+2. Include `agentSettings` on the person only when the selected person is AI.
+3. Set that person's employee role with `POST /api/employees`.
 4. Send a prompt to that AI employee with `POST /api/agents/by-key/{key}/chat`.
 5. Read execution history with `GET /api/agents/by-key/{key}/executions`.
 

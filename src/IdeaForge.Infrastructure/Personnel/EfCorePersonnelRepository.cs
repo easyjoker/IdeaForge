@@ -16,7 +16,7 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<IReadOnlyList<Person>> ListPeopleAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PersonDirectoryRecord>> ListPeopleAsync(CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entities = await dbContext.Persons
@@ -24,20 +24,20 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
             .OrderBy(static person => person.DisplayName)
             .ToListAsync(cancellationToken);
 
-        return entities.Select(Map).ToArray();
+        return await BuildPersonRecordsAsync(dbContext, entities, cancellationToken);
     }
 
-    public async Task<Person?> GetPersonAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<PersonDirectoryRecord?> GetPersonAsync(Guid id, CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.Persons
             .AsNoTracking()
             .FirstOrDefaultAsync(person => person.Id == id, cancellationToken);
 
-        return entity is null ? null : Map(entity);
+        return entity is null ? null : (await BuildPersonRecordsAsync(dbContext, [entity], cancellationToken)).SingleOrDefault();
     }
 
-    public async Task<Person?> GetPersonByKindAndDisplayNameAsync(PersonKind kind, string displayName, CancellationToken cancellationToken = default)
+    public async Task<PersonDirectoryRecord?> GetPersonByKindAndDisplayNameAsync(PersonKind kind, string displayName, CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
         var normalizedDisplayName = displayName.Trim().ToLower();
@@ -47,21 +47,33 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
                 person => person.Kind == (short)kind && person.DisplayName.ToLower() == normalizedDisplayName,
                 cancellationToken);
 
-        return entity is null ? null : Map(entity);
+        return entity is null ? null : (await BuildPersonRecordsAsync(dbContext, [entity], cancellationToken)).SingleOrDefault();
     }
 
-    public async Task<Person> AddPersonAsync(Person person, CancellationToken cancellationToken = default)
+    public async Task<PersonDirectoryRecord> AddPersonAsync(Person person, AgentData? agentData, CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
         var entity = ToEntity(person);
         dbContext.Persons.Add(entity);
+        if (agentData is not null)
+        {
+            dbContext.AgentData.Add(ToEntity(agentData));
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Map(entity);
+        await transaction.CommitAsync(cancellationToken);
+
+        return await GetPersonAsync(person.Id, cancellationToken)
+            ?? throw new InvalidOperationException($"Person '{person.Id}' was not found after creation.");
     }
 
-    public async Task<Person?> UpdatePersonAsync(Person person, CancellationToken cancellationToken = default)
+    public async Task<PersonDirectoryRecord?> UpdatePersonAsync(Person person, AgentData? agentData, CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
         var entity = await dbContext.Persons.FirstOrDefaultAsync(item => item.Id == person.Id, cancellationToken);
         if (entity is null)
         {
@@ -74,8 +86,32 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
         entity.MetadataJson = JsonSerializer.Serialize(person.Metadata, JsonOptions);
         entity.UpdatedAtUtc = person.UpdatedAtUtc;
 
+        var agentEntity = await dbContext.AgentData.FirstOrDefaultAsync(item => item.PersonId == person.Id, cancellationToken);
+        if (agentData is null)
+        {
+            if (agentEntity is not null)
+            {
+                dbContext.AgentData.Remove(agentEntity);
+            }
+        }
+        else if (agentEntity is null)
+        {
+            dbContext.AgentData.Add(ToEntity(agentData));
+        }
+        else
+        {
+            agentEntity.Provider = (short)agentData.Provider;
+            agentEntity.Model = agentData.Model;
+            agentEntity.SessionId = agentData.SessionId;
+            agentEntity.SystemPrompt = agentData.SystemPrompt;
+            agentEntity.LastUsedAtUtc = agentData.LastUsedAtUtc;
+            agentEntity.SessionUpdatedAtUtc = agentData.SessionUpdatedAtUtc;
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Map(entity);
+        await transaction.CommitAsync(cancellationToken);
+
+        return await GetPersonAsync(person.Id, cancellationToken);
     }
 
     public async Task<bool> DeletePersonAsync(Guid id, CancellationToken cancellationToken = default)
@@ -135,28 +171,19 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
         return (await BuildEmployeeRecordsAsync(dbContext, [entity], cancellationToken)).SingleOrDefault();
     }
 
-    public async Task<EmployeeDirectoryRecord> AddEmployeeAsync(Employee employee, AgentData? agentData, CancellationToken cancellationToken = default)
+    public async Task<EmployeeDirectoryRecord> AddEmployeeAsync(Employee employee, CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-
         dbContext.Employees.Add(ToEntity(employee));
-        if (agentData is not null)
-        {
-            dbContext.AgentData.Add(ToEntity(agentData));
-        }
-
         await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
 
         return await GetEmployeeAsync(employee.Id, cancellationToken)
             ?? throw new InvalidOperationException($"Employee '{employee.Id}' was not found after creation.");
     }
 
-    public async Task<EmployeeDirectoryRecord?> UpdateEmployeeAsync(Employee employee, AgentData? agentData, CancellationToken cancellationToken = default)
+    public async Task<EmployeeDirectoryRecord?> UpdateEmployeeAsync(Employee employee, CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         var employeeEntity = await dbContext.Employees.FirstOrDefaultAsync(item => item.Id == employee.Id, cancellationToken);
         if (employeeEntity is null)
@@ -172,30 +199,7 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
         employeeEntity.MetadataJson = JsonSerializer.Serialize(employee.Metadata, JsonOptions);
         employeeEntity.UpdatedAtUtc = employee.UpdatedAtUtc;
 
-        var agentEntity = await dbContext.AgentData.FirstOrDefaultAsync(item => item.EmployeeId == employee.Id, cancellationToken);
-        if (agentData is null)
-        {
-            if (agentEntity is not null)
-            {
-                dbContext.AgentData.Remove(agentEntity);
-            }
-        }
-        else if (agentEntity is null)
-        {
-            dbContext.AgentData.Add(ToEntity(agentData));
-        }
-        else
-        {
-            agentEntity.Provider = (short)agentData.Provider;
-            agentEntity.Model = agentData.Model;
-            agentEntity.SessionId = agentData.SessionId;
-            agentEntity.SystemPrompt = agentData.SystemPrompt;
-            agentEntity.LastUsedAtUtc = agentData.LastUsedAtUtc;
-            agentEntity.SessionUpdatedAtUtc = agentData.SessionUpdatedAtUtc;
-        }
-
         await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
 
         return await GetEmployeeAsync(employee.Id, cancellationToken);
     }
@@ -217,22 +221,38 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
     public async Task RemoveAgentDataByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var employeeIds = await dbContext.Employees
-            .Where(employee => employee.PersonId == personId)
-            .Select(employee => employee.Id)
-            .ToArrayAsync(cancellationToken);
-
-        if (employeeIds.Length == 0)
-        {
-            return;
-        }
-
         var agentData = await dbContext.AgentData
-            .Where(agent => employeeIds.Contains(agent.EmployeeId))
+            .Where(agent => agent.PersonId == personId)
             .ToArrayAsync(cancellationToken);
 
         dbContext.AgentData.RemoveRange(agentData);
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private static async Task<IReadOnlyList<PersonDirectoryRecord>> BuildPersonRecordsAsync(
+        IdeaForgeDbContext dbContext,
+        IReadOnlyList<PersonEntity> people,
+        CancellationToken cancellationToken)
+    {
+        if (people.Count == 0)
+        {
+            return Array.Empty<PersonDirectoryRecord>();
+        }
+
+        var personIds = people.Select(static person => person.Id).ToArray();
+        var agentData = await dbContext.AgentData
+            .AsNoTracking()
+            .Where(agent => personIds.Contains(agent.PersonId))
+            .ToDictionaryAsync(agent => agent.PersonId, cancellationToken);
+
+        return people
+            .Select(person => new PersonDirectoryRecord
+            {
+                Person = Map(person),
+                AgentData = agentData.TryGetValue(person.Id, out var agent) ? Map(agent) : null
+            })
+            .OrderBy(static record => record.Person.DisplayName)
+            .ToArray();
     }
 
     private static async Task<IReadOnlyList<EmployeeDirectoryRecord>> BuildEmployeeRecordsAsync(
@@ -246,7 +266,6 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
         }
 
         var personIds = employees.Select(static employee => employee.PersonId).Distinct().ToArray();
-        var employeeIds = employees.Select(static employee => employee.Id).ToArray();
 
         var people = await dbContext.Persons
             .AsNoTracking()
@@ -255,8 +274,8 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
 
         var agentData = await dbContext.AgentData
             .AsNoTracking()
-            .Where(agent => employeeIds.Contains(agent.EmployeeId))
-            .ToDictionaryAsync(agent => agent.EmployeeId, cancellationToken);
+            .Where(agent => personIds.Contains(agent.PersonId))
+            .ToDictionaryAsync(agent => agent.PersonId, cancellationToken);
 
         return employees
             .Where(employee => people.ContainsKey(employee.PersonId))
@@ -264,7 +283,7 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
             {
                 Person = Map(people[employee.PersonId]),
                 Employee = Map(employee),
-                AgentData = agentData.TryGetValue(employee.Id, out var agent) ? Map(agent) : null
+                AgentData = agentData.TryGetValue(employee.PersonId, out var agent) ? Map(agent) : null
             })
             .OrderBy(static record => record.Person.DisplayName)
             .ToArray();
@@ -300,7 +319,7 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
     private static AgentData Map(AgentDataEntity entity) =>
         new()
         {
-            EmployeeId = entity.EmployeeId,
+            PersonId = entity.PersonId,
             Provider = (AgentProviderKind)entity.Provider,
             Model = entity.Model,
             SessionId = entity.SessionId,
@@ -339,7 +358,7 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
     private static AgentDataEntity ToEntity(AgentData agentData) =>
         new()
         {
-            EmployeeId = agentData.EmployeeId,
+            PersonId = agentData.PersonId,
             Provider = (short)agentData.Provider,
             Model = agentData.Model,
             SessionId = agentData.SessionId,

@@ -109,7 +109,7 @@ Stores the company employment/work-assignment record:
 
 `agent_data`
 
-Stores current runtime state for AI employees only:
+Stores current runtime state for AI people only:
 
 - provider
 - model

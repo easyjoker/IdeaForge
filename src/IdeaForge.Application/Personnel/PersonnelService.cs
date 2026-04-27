@@ -19,8 +19,8 @@ public sealed class PersonnelService : IPersonnelService
 
     public async Task<PersonDirectoryDto?> GetPersonAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var person = await _repository.GetPersonAsync(id, cancellationToken);
-        return person is null ? null : Map(person);
+        var record = await _repository.GetPersonAsync(id, cancellationToken);
+        return record is null ? null : Map(record);
     }
 
     public async Task<PersonDirectoryDto> CreatePersonAsync(CreatePersonRequest request, CancellationToken cancellationToken = default)
@@ -46,7 +46,11 @@ public sealed class PersonnelService : IPersonnelService
             UpdatedAtUtc = now
         };
 
-        return Map(await _repository.AddPersonAsync(person, cancellationToken));
+        var agentData = person.Kind == PersonKind.Ai
+            ? CreateAgentData(person.Id, request.AgentSettings, existing: null)
+            : null;
+
+        return Map(await _repository.AddPersonAsync(person, agentData, cancellationToken));
     }
 
     public async Task<PersonDirectoryDto?> UpdatePersonAsync(Guid id, UpdatePersonRequest request, CancellationToken cancellationToken = default)
@@ -54,32 +58,31 @@ public sealed class PersonnelService : IPersonnelService
         ArgumentNullException.ThrowIfNull(request);
         EnsureSupportedKind(request.Kind);
 
-        var person = await _repository.GetPersonAsync(id, cancellationToken);
-        if (person is null)
+        var existing = await _repository.GetPersonAsync(id, cancellationToken);
+        if (existing is null)
         {
             return null;
         }
 
-        var wasAi = person.Kind == PersonKind.Ai;
+        var person = existing.Person;
         person.Kind = request.Kind;
         person.DisplayName = RequireText(request.DisplayName, nameof(request.DisplayName));
         person.Description = NormalizeOptional(request.Description);
         person.Metadata = NormalizeMetadata(request.Metadata);
         person.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
-        var updated = await _repository.UpdatePersonAsync(person, cancellationToken);
-        if (wasAi && request.Kind != PersonKind.Ai)
-        {
-            await _repository.RemoveAgentDataByPersonIdAsync(id, cancellationToken);
-        }
+        var agentData = person.Kind == PersonKind.Ai
+            ? CreateAgentData(person.Id, request.AgentSettings, existing.AgentData)
+            : null;
 
+        var updated = await _repository.UpdatePersonAsync(person, agentData, cancellationToken);
         return updated is null ? null : Map(updated);
     }
 
     public async Task<bool> DeletePersonAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var person = await _repository.GetPersonAsync(id, cancellationToken);
-        if (person is null)
+        var personRecord = await _repository.GetPersonAsync(id, cancellationToken);
+        if (personRecord is null)
         {
             return false;
         }
@@ -87,7 +90,7 @@ public sealed class PersonnelService : IPersonnelService
         var employee = await _repository.GetEmployeeByPersonIdAsync(id, cancellationToken);
         if (employee is not null)
         {
-            throw new InvalidOperationException($"Person '{person.DisplayName}' has an employee assignment. Delete the employee assignment first.");
+            throw new InvalidOperationException($"Person '{personRecord.Person.DisplayName}' has an employee assignment. Delete the employee assignment first.");
         }
 
         return await _repository.DeletePersonAsync(id, cancellationToken);
@@ -109,7 +112,7 @@ public sealed class PersonnelService : IPersonnelService
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var person = await _repository.GetPersonAsync(request.PersonId, cancellationToken)
+        var personRecord = await _repository.GetPersonAsync(request.PersonId, cancellationToken)
             ?? throw new KeyNotFoundException($"Person '{request.PersonId}' was not found.");
 
         var existingForPerson = await _repository.GetEmployeeByPersonIdAsync(request.PersonId, cancellationToken);
@@ -125,6 +128,7 @@ public sealed class PersonnelService : IPersonnelService
             throw new InvalidOperationException($"Employee key '{key}' already exists.");
         }
 
+        var person = personRecord.Person;
         var now = DateTimeOffset.UtcNow;
         var employee = new Employee
         {
@@ -139,11 +143,7 @@ public sealed class PersonnelService : IPersonnelService
             UpdatedAtUtc = now
         };
 
-        var agentData = person.Kind == PersonKind.Ai
-            ? CreateAgentData(employee.Id, request.AgentSettings, requireSettings: true)
-            : null;
-
-        return Map(await _repository.AddEmployeeAsync(employee, agentData, cancellationToken));
+        return Map(await _repository.AddEmployeeAsync(employee, cancellationToken));
     }
 
     public async Task<EmployeeDirectoryDto?> UpdateEmployeeAsync(Guid id, UpdateEmployeeRequest request, CancellationToken cancellationToken = default)
@@ -171,37 +171,30 @@ public sealed class PersonnelService : IPersonnelService
         existing.Employee.Metadata = NormalizeMetadata(request.Metadata);
         existing.Employee.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
-        var agentData = existing.Person.Kind == PersonKind.Ai
-            ? CreateAgentData(existing.Employee.Id, request.AgentSettings, existing.AgentData, requireSettings: existing.AgentData is null)
-            : null;
-
-        return Map(await _repository.UpdateEmployeeAsync(existing.Employee, agentData, cancellationToken) ?? existing);
+        return Map(await _repository.UpdateEmployeeAsync(existing.Employee, cancellationToken) ?? existing);
     }
 
     public Task<bool> DeleteEmployeeAsync(Guid id, CancellationToken cancellationToken = default) =>
         _repository.DeleteEmployeeAsync(id, cancellationToken);
 
-    private static AgentData CreateAgentData(Guid employeeId, UpsertAgentSettingsRequest? request, bool requireSettings) =>
-        CreateAgentData(employeeId, request, null, requireSettings);
-
-    private static AgentData CreateAgentData(Guid employeeId, UpsertAgentSettingsRequest? request, AgentData? existing, bool requireSettings)
-    {
-        if (request is null && requireSettings)
+    private static AgentData CreateAgentData(Guid personId, UpsertAgentSettingsRequest? request, AgentData? existing) =>
+        new()
         {
-            throw new ArgumentException("Agent settings are required when the person is AI.", nameof(request));
-        }
-
-        return new AgentData
-        {
-            EmployeeId = employeeId,
-            Provider = request?.Provider ?? existing?.Provider ?? AgentProviderKind.Codex,
+            PersonId = personId,
+            Provider = ResolveProvider(request?.Provider, existing?.Provider),
             Model = string.IsNullOrWhiteSpace(request?.Model) ? existing?.Model ?? "gpt-5.4" : request.Model.Trim(),
             SessionId = existing?.SessionId,
             SystemPrompt = request is null ? existing?.SystemPrompt : NormalizeOptional(request.SystemPrompt),
             LastUsedAtUtc = existing?.LastUsedAtUtc,
             SessionUpdatedAtUtc = existing?.SessionUpdatedAtUtc
         };
-    }
+
+    private static AgentProviderKind ResolveProvider(AgentProviderKind? requested, AgentProviderKind? existing) =>
+        requested is AgentProviderKind.Copilot or AgentProviderKind.Codex
+            ? requested.Value
+            : existing is AgentProviderKind.Copilot or AgentProviderKind.Codex
+                ? existing.Value
+                : AgentProviderKind.Codex;
 
     private static void EnsureSupportedKind(PersonKind kind)
     {
@@ -211,22 +204,23 @@ public sealed class PersonnelService : IPersonnelService
         }
     }
 
-    private static PersonDirectoryDto Map(Person person) =>
+    private static PersonDirectoryDto Map(PersonDirectoryRecord record) =>
         new()
         {
-            Id = person.Id,
-            Kind = person.Kind,
-            DisplayName = person.DisplayName,
-            Description = person.Description,
-            Metadata = new Dictionary<string, string>(person.Metadata, StringComparer.OrdinalIgnoreCase),
-            CreatedAtUtc = person.CreatedAtUtc,
-            UpdatedAtUtc = person.UpdatedAtUtc
+            Id = record.Person.Id,
+            Kind = record.Person.Kind,
+            DisplayName = record.Person.DisplayName,
+            Description = record.Person.Description,
+            Metadata = new Dictionary<string, string>(record.Person.Metadata, StringComparer.OrdinalIgnoreCase),
+            AgentSettings = record.AgentData is null ? null : Map(record.AgentData),
+            CreatedAtUtc = record.Person.CreatedAtUtc,
+            UpdatedAtUtc = record.Person.UpdatedAtUtc
         };
 
     private static EmployeeDirectoryDto Map(EmployeeDirectoryRecord record) =>
         new()
         {
-            Person = Map(record.Person),
+            Person = Map(new PersonDirectoryRecord { Person = record.Person, AgentData = record.AgentData }),
             Id = record.Employee.Id,
             Key = record.Employee.Key,
             Role = record.Employee.Role,
@@ -234,7 +228,6 @@ public sealed class PersonnelService : IPersonnelService
             Status = record.Employee.Status,
             Specialties = record.Employee.Specialties.ToArray(),
             Metadata = new Dictionary<string, string>(record.Employee.Metadata, StringComparer.OrdinalIgnoreCase),
-            AgentSettings = record.AgentData is null ? null : Map(record.AgentData),
             CreatedAtUtc = record.Employee.CreatedAtUtc,
             UpdatedAtUtc = record.Employee.UpdatedAtUtc
         };

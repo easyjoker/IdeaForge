@@ -33,6 +33,11 @@ public sealed class PersonDirectoryDto
     public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
 
     /// <summary>
+    /// AI agent settings. Present only when this person is AI and settings exist.
+    /// </summary>
+    public AgentSettingsDto? AgentSettings { get; init; }
+
+    /// <summary>
     /// UTC timestamp when this person was created.
     /// </summary>
     public DateTimeOffset CreatedAtUtc { get; init; }
@@ -89,11 +94,6 @@ public sealed class EmployeeDirectoryDto
     public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
 
     /// <summary>
-    /// AI agent settings. Present only when the linked person is AI and settings exist.
-    /// </summary>
-    public AgentSettingsDto? AgentSettings { get; init; }
-
-    /// <summary>
     /// UTC timestamp when this employee record was created.
     /// </summary>
     public DateTimeOffset CreatedAtUtc { get; init; }
@@ -105,7 +105,7 @@ public sealed class EmployeeDirectoryDto
 }
 
 /// <summary>
-/// AI-only agent settings for an employee.
+/// AI-only agent settings for a person.
 /// </summary>
 public sealed class AgentSettingsDto
 {
@@ -115,7 +115,7 @@ public sealed class AgentSettingsDto
     public AgentProviderKind Provider { get; init; }
 
     /// <summary>
-    /// Model currently assigned to the AI employee.
+    /// Model currently assigned to the AI person.
     /// </summary>
     public required string Model { get; init; }
 
@@ -164,6 +164,11 @@ public sealed class CreatePersonRequest
     /// Free-form person metadata.
     /// </summary>
     public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
+
+    /// <summary>
+    /// AI-only settings. Used only when kind is AI; omitted Human people do not get agent settings.
+    /// </summary>
+    public UpsertAgentSettingsRequest? AgentSettings { get; init; }
 }
 
 /// <summary>
@@ -190,6 +195,11 @@ public sealed class UpdatePersonRequest
     /// Free-form person metadata.
     /// </summary>
     public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
+
+    /// <summary>
+    /// AI-only settings. Used only when kind is AI; changing a person to Human removes existing settings.
+    /// </summary>
+    public UpsertAgentSettingsRequest? AgentSettings { get; init; }
 }
 
 /// <summary>
@@ -227,14 +237,10 @@ public sealed class CreateEmployeeRequest
     /// </summary>
     public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
 
-    /// <summary>
-    /// AI-only settings. Required when the selected person is AI.
-    /// </summary>
-    public UpsertAgentSettingsRequest? AgentSettings { get; init; }
 }
 
 /// <summary>
-/// Request used to update an employee record and optional AI settings.
+/// Request used to update an employee work assignment.
 /// </summary>
 public sealed class UpdateEmployeeRequest
 {
@@ -268,10 +274,6 @@ public sealed class UpdateEmployeeRequest
     /// </summary>
     public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
 
-    /// <summary>
-    /// AI-only settings. Used only when the linked person is AI.
-    /// </summary>
-    public UpsertAgentSettingsRequest? AgentSettings { get; init; }
 }
 
 /// <summary>
@@ -285,7 +287,7 @@ public sealed class UpsertAgentSettingsRequest
     public AgentProviderKind Provider { get; init; }
 
     /// <summary>
-    /// Model currently assigned to the AI employee.
+    /// Model currently assigned to the AI person.
     /// </summary>
     public string? Model { get; init; }
 

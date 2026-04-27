@@ -76,12 +76,12 @@ public sealed class IdeaForgeDbContext : DbContext
     {
         var entity = modelBuilder.Entity<AgentDataEntity>();
         entity.ToTable("agent_data", "public");
-        entity.HasKey(agentData => agentData.EmployeeId);
+        entity.HasKey(agentData => agentData.PersonId);
         entity.HasIndex(agentData => agentData.Provider).HasDatabaseName("ix_agent_data_provider");
         entity.HasIndex(agentData => agentData.SessionId).HasDatabaseName("ix_agent_data_session_id");
-        entity.HasOne<EmployeeEntity>().WithOne().HasForeignKey<AgentDataEntity>(agentData => agentData.EmployeeId).OnDelete(DeleteBehavior.Cascade);
+        entity.HasOne<PersonEntity>().WithOne().HasForeignKey<AgentDataEntity>(agentData => agentData.PersonId).OnDelete(DeleteBehavior.Cascade);
 
-        entity.Property(agentData => agentData.EmployeeId).HasColumnName("employee_id");
+        entity.Property(agentData => agentData.PersonId).HasColumnName("person_id");
         entity.Property(agentData => agentData.Provider).HasColumnName("provider");
         entity.Property(agentData => agentData.Model).HasColumnName("model").HasDefaultValue("gpt-5.4").IsRequired();
         entity.Property(agentData => agentData.SessionId).HasColumnName("session_id");
