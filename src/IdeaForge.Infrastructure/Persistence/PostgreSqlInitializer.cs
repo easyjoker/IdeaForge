@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace IdeaForge.Infrastructure.Persistence;
@@ -6,12 +6,14 @@ namespace IdeaForge.Infrastructure.Persistence;
 public sealed class PostgreSqlInitializer : IPostgreSqlInitializer
 {
     private readonly PostgreSqlOptions _options;
-    private readonly IHostEnvironment _hostEnvironment;
+    private readonly IDbContextFactory<IdeaForgeDbContext> _dbContextFactory;
 
-    public PostgreSqlInitializer(PostgreSqlOptions options, IHostEnvironment hostEnvironment)
+    public PostgreSqlInitializer(
+        PostgreSqlOptions options,
+        IDbContextFactory<IdeaForgeDbContext> dbContextFactory)
     {
         _options = options;
-        _hostEnvironment = hostEnvironment;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -23,19 +25,8 @@ public sealed class PostgreSqlInitializer : IPostgreSqlInitializer
 
         await EnsureDatabaseExistsAsync(cancellationToken);
 
-        var schemaPath = Path.GetFullPath(Path.Combine(_hostEnvironment.ContentRootPath, _options.SchemaScriptPath));
-        if (!File.Exists(schemaPath))
-        {
-            throw new FileNotFoundException($"Schema script was not found: {schemaPath}", schemaPath);
-        }
-
-        var sql = await File.ReadAllTextAsync(schemaPath, cancellationToken);
-
-        await using var connection = new NpgsqlConnection(_options.ConnectionString);
-        await connection.OpenAsync(cancellationToken);
-
-        await using var command = new NpgsqlCommand(sql, connection);
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await dbContext.Database.MigrateAsync(cancellationToken);
     }
 
     private async Task EnsureDatabaseExistsAsync(CancellationToken cancellationToken)

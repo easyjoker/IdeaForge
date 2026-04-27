@@ -13,7 +13,7 @@ The project currently supports two provider paths:
 - ASP.NET Core 10 Web API under `src/IdeaForge.WebApi`
 - Application layer use cases under `src/IdeaForge.Application`
 - PostgreSQL persistence under `src/IdeaForge.Infrastructure`
-- Database schema under `db/postgresql`
+- EF Core migrations under `src/IdeaForge.Infrastructure/Persistence/Migrations`
 - PowerShell wrappers for Copilot and Codex execution
 
 ## Documentation

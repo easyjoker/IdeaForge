@@ -14,8 +14,6 @@ src/
   IdeaForge.Infrastructure/
   IdeaForge.WebApi/
   IdeaForge.Agents.Console/
-db/
-  postgresql/
 ```
 
 ## Projects
@@ -60,6 +58,8 @@ Contains use cases and application-facing DTOs:
 
 Contains PostgreSQL persistence and database initialization:
 
+- `IdeaForgeDbContext`
+- EF Core migrations
 - `PostgreSqlAgentProfileRepository`
 - `PostgreSqlInitializer`
 - `PostgreSqlOptions`

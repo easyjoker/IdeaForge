@@ -1,6 +1,7 @@
 using IdeaForge.Application.Agents;
 using IdeaForge.Infrastructure.Agents;
 using IdeaForge.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +20,7 @@ public static class ServiceCollectionExtensions
         };
 
         services.AddSingleton(options);
+        services.AddDbContextFactory<IdeaForgeDbContext>(builder => builder.UseNpgsql(options.ConnectionString));
         services.AddSingleton<IPostgreSqlInitializer, PostgreSqlInitializer>();
         services.AddScoped<IAgentProfileRepository, PostgreSqlAgentProfileRepository>();
         return services;

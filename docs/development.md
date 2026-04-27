@@ -28,8 +28,27 @@ src/IdeaForge.WebApi/appsettings.Development.json
 The startup initializer will:
 
 - create the configured database when it does not exist
-- execute `db/postgresql/001_agents.sql`
+- apply EF Core migrations
 - create `employees`, `agent_data`, `agent_executions`, `client_company`, `client_project`, and `project_repository`
+
+Apply migrations manually:
+
+```powershell
+dotnet ef database update `
+  --project D:\projects\IdeaForge\src\IdeaForge.Infrastructure `
+  --startup-project D:\projects\IdeaForge\src\IdeaForge.Infrastructure `
+  --context IdeaForgeDbContext
+```
+
+Add a new migration:
+
+```powershell
+dotnet ef migrations add <MigrationName> `
+  --project D:\projects\IdeaForge\src\IdeaForge.Infrastructure `
+  --startup-project D:\projects\IdeaForge\src\IdeaForge.Infrastructure `
+  --context IdeaForgeDbContext `
+  --output-dir Persistence\Migrations
+```
 
 For non-local environments, move credentials to user secrets, environment variables, or a secret manager.
 
