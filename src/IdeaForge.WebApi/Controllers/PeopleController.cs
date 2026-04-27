@@ -89,6 +89,26 @@ public sealed class PeopleController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Delete a person that is not assigned as an employee.
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var deleted = await _service.DeletePersonAsync(id, cancellationToken);
+            return deleted ? NoContent() : NotFound();
+        }
+        catch (InvalidOperationException exception)
+        {
+            return Conflict(CreateProblem("Person conflict", exception, StatusCodes.Status409Conflict));
+        }
+    }
+
     private static ProblemDetails CreateProblem(string title, Exception exception, int statusCode) =>
         new()
         {

@@ -44,6 +44,16 @@ Endpoint:
 GET /api/people
 ```
 
+## Delete Person
+
+Endpoint:
+
+```http
+DELETE /api/people/{id}
+```
+
+Only unassigned people can be deleted. If the person already has an employee role, the API returns `409 Conflict`; delete the employee role first.
+
 ## Set Employee Role
 
 Endpoint:
@@ -92,6 +102,16 @@ Endpoint:
 ```http
 GET /api/employees
 ```
+
+## Delete Employee Role
+
+Endpoint:
+
+```http
+DELETE /api/employees/{id}
+```
+
+Deleting an employee role also removes linked AI agent data and execution history through database cascade rules. The person record remains available.
 
 ## Create Agent
 

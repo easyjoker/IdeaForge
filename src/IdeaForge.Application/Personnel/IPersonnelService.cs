@@ -10,6 +10,8 @@ public interface IPersonnelService
 
     Task<PersonDirectoryDto?> UpdatePersonAsync(Guid id, UpdatePersonRequest request, CancellationToken cancellationToken = default);
 
+    Task<bool> DeletePersonAsync(Guid id, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<EmployeeDirectoryDto>> ListEmployeesAsync(CancellationToken cancellationToken = default);
 
     Task<EmployeeDirectoryDto?> GetEmployeeAsync(Guid id, CancellationToken cancellationToken = default);
@@ -17,4 +19,6 @@ public interface IPersonnelService
     Task<EmployeeDirectoryDto> CreateEmployeeAsync(CreateEmployeeRequest request, CancellationToken cancellationToken = default);
 
     Task<EmployeeDirectoryDto?> UpdateEmployeeAsync(Guid id, UpdateEmployeeRequest request, CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteEmployeeAsync(Guid id, CancellationToken cancellationToken = default);
 }

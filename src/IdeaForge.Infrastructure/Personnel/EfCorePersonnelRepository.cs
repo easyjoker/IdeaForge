@@ -78,6 +78,20 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
         return Map(entity);
     }
 
+    public async Task<bool> DeletePersonAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var entity = await dbContext.Persons.FirstOrDefaultAsync(person => person.Id == id, cancellationToken);
+        if (entity is null)
+        {
+            return false;
+        }
+
+        dbContext.Persons.Remove(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     public async Task<IReadOnlyList<EmployeeDirectoryRecord>> ListEmployeesAsync(CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -184,6 +198,20 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
         await transaction.CommitAsync(cancellationToken);
 
         return await GetEmployeeAsync(employee.Id, cancellationToken);
+    }
+
+    public async Task<bool> DeleteEmployeeAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var entity = await dbContext.Employees.FirstOrDefaultAsync(employee => employee.Id == id, cancellationToken);
+        if (entity is null)
+        {
+            return false;
+        }
+
+        dbContext.Employees.Remove(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public async Task RemoveAgentDataByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)

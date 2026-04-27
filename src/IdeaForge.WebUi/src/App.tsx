@@ -11,6 +11,7 @@ import {
   Input,
   Layout,
   Modal,
+  Popconfirm,
   Row,
   Select,
   Space,
@@ -26,6 +27,7 @@ import {
   ApiOutlined,
   ApartmentOutlined,
   CloudServerOutlined,
+  DeleteOutlined,
   IdcardOutlined,
   MessageOutlined,
   PlusOutlined,
@@ -277,6 +279,7 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
   const [people, setPeople] = useState<PersonDirectoryDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [savingPerson, setSavingPerson] = useState(false);
+  const [deletingPersonId, setDeletingPersonId] = useState<string>();
   const [open, setOpen] = useState(false);
   const [editingPerson, setEditingPerson] = useState<PersonDirectoryDto>();
   const [personForm] = Form.useForm<PersonFormValues>();
@@ -333,6 +336,25 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
     } finally {
       personSaveInFlightRef.current = false;
       setSavingPerson(false);
+    }
+  }
+
+  async function deletePerson(person: PersonDirectoryDto) {
+    setDeletingPersonId(person.id);
+    try {
+      await api.deletePerson(person.id);
+      if (editingPerson?.id === person.id) {
+        setOpen(false);
+        setEditingPerson(undefined);
+        personForm.resetFields();
+      }
+
+      messageApi.success("Person deleted");
+      await loadPeople();
+    } catch (error) {
+      messageApi.error(toErrorMessage(error));
+    } finally {
+      setDeletingPersonId(undefined);
     }
   }
 
@@ -408,9 +430,23 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
             {
               title: "Action",
               render: (_, record) => (
-                <Button size="small" onClick={() => openPersonForm(record)}>
-                  Edit
-                </Button>
+                <Space>
+                  <Button size="small" onClick={() => openPersonForm(record)} disabled={deletingPersonId === record.id}>
+                    Edit
+                  </Button>
+                  <Popconfirm
+                    title="Delete person"
+                    description="Only unassigned people can be deleted."
+                    okText="Delete"
+                    cancelText="Cancel"
+                    okButtonProps={{ danger: true }}
+                    onConfirm={() => deletePerson(record)}
+                  >
+                    <Button danger size="small" icon={<DeleteOutlined />} loading={deletingPersonId === record.id}>
+                      Delete
+                    </Button>
+                  </Popconfirm>
+                </Space>
               )
             }
           ]}
@@ -451,6 +487,7 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
   const [people, setPeople] = useState<PersonDirectoryDto[]>([]);
   const [employees, setEmployees] = useState<EmployeeDirectoryDto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletingEmployeeId, setDeletingEmployeeId] = useState<string>();
   const [open, setOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<EmployeeDirectoryDto>();
   const [employeeForm] = Form.useForm<EmployeeFormValues>();
@@ -507,6 +544,25 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
       await loadDirectory();
     } catch (error) {
       messageApi.error(toErrorMessage(error));
+    }
+  }
+
+  async function deleteEmployee(employee: EmployeeDirectoryDto) {
+    setDeletingEmployeeId(employee.id);
+    try {
+      await api.deleteEmployee(employee.id);
+      if (editingEmployee?.id === employee.id) {
+        setOpen(false);
+        setEditingEmployee(undefined);
+        employeeForm.resetFields();
+      }
+
+      messageApi.success("Employee role deleted");
+      await loadDirectory();
+    } catch (error) {
+      messageApi.error(toErrorMessage(error));
+    } finally {
+      setDeletingEmployeeId(undefined);
     }
   }
 
@@ -613,9 +669,23 @@ function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeo
             {
               title: "Action",
               render: (_, record) => (
-                <Button size="small" onClick={() => openEmployeeForm(record)}>
-                  Edit
-                </Button>
+                <Space>
+                  <Button size="small" onClick={() => openEmployeeForm(record)} disabled={deletingEmployeeId === record.id}>
+                    Edit
+                  </Button>
+                  <Popconfirm
+                    title="Delete employee role"
+                    description="AI agent data and execution history for this employee will also be deleted."
+                    okText="Delete"
+                    cancelText="Cancel"
+                    okButtonProps={{ danger: true }}
+                    onConfirm={() => deleteEmployee(record)}
+                  >
+                    <Button danger size="small" icon={<DeleteOutlined />} loading={deletingEmployeeId === record.id}>
+                      Delete
+                    </Button>
+                  </Popconfirm>
+                </Space>
               )
             }
           ]}

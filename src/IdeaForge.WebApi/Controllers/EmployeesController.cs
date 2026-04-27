@@ -99,6 +99,18 @@ public sealed class EmployeesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Delete an employee assignment. Related AI agent data and execution history are removed by database cascade rules.
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var deleted = await _service.DeleteEmployeeAsync(id, cancellationToken);
+        return deleted ? NoContent() : NotFound();
+    }
+
     private static ProblemDetails CreateProblem(string title, Exception exception, int statusCode) =>
         new()
         {

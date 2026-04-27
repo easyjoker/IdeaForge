@@ -88,6 +88,10 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(body)
     }),
+  deletePerson: (id: string) =>
+    request<void>(`/people/${id}`, {
+      method: "DELETE"
+    }),
   listEmployees: () => request<EmployeeDirectoryDto[]>("/employees"),
   createEmployee: (body: CreateEmployeeRequest) =>
     request<EmployeeDirectoryDto>("/employees", {
@@ -98,6 +102,10 @@ export const api = {
     request<EmployeeDirectoryDto>(`/employees/${id}`, {
       method: "PUT",
       body: JSON.stringify(body)
+    }),
+  deleteEmployee: (id: string) =>
+    request<void>(`/employees/${id}`, {
+      method: "DELETE"
     }),
   createAgent: (body: CreateAgentProfileRequest) =>
     request<AgentProfileDto>("/agents", {

@@ -14,6 +14,8 @@ public interface IPersonnelRepository
 
     Task<Person?> UpdatePersonAsync(Person person, CancellationToken cancellationToken = default);
 
+    Task<bool> DeletePersonAsync(Guid id, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<EmployeeDirectoryRecord>> ListEmployeesAsync(CancellationToken cancellationToken = default);
 
     Task<EmployeeDirectoryRecord?> GetEmployeeAsync(Guid id, CancellationToken cancellationToken = default);
@@ -25,6 +27,8 @@ public interface IPersonnelRepository
     Task<EmployeeDirectoryRecord> AddEmployeeAsync(Employee employee, AgentData? agentData, CancellationToken cancellationToken = default);
 
     Task<EmployeeDirectoryRecord?> UpdateEmployeeAsync(Employee employee, AgentData? agentData, CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteEmployeeAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task RemoveAgentDataByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default);
 }

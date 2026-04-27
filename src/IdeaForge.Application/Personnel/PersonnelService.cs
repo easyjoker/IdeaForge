@@ -76,6 +76,23 @@ public sealed class PersonnelService : IPersonnelService
         return updated is null ? null : Map(updated);
     }
 
+    public async Task<bool> DeletePersonAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var person = await _repository.GetPersonAsync(id, cancellationToken);
+        if (person is null)
+        {
+            return false;
+        }
+
+        var employee = await _repository.GetEmployeeByPersonIdAsync(id, cancellationToken);
+        if (employee is not null)
+        {
+            throw new InvalidOperationException($"Person '{person.DisplayName}' has an employee assignment. Delete the employee assignment first.");
+        }
+
+        return await _repository.DeletePersonAsync(id, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<EmployeeDirectoryDto>> ListEmployeesAsync(CancellationToken cancellationToken = default)
     {
         var employees = await _repository.ListEmployeesAsync(cancellationToken);
@@ -160,6 +177,9 @@ public sealed class PersonnelService : IPersonnelService
 
         return Map(await _repository.UpdateEmployeeAsync(existing.Employee, agentData, cancellationToken) ?? existing);
     }
+
+    public Task<bool> DeleteEmployeeAsync(Guid id, CancellationToken cancellationToken = default) =>
+        _repository.DeleteEmployeeAsync(id, cancellationToken);
 
     private static AgentData CreateAgentData(Guid employeeId, UpsertAgentSettingsRequest? request, bool requireSettings) =>
         CreateAgentData(employeeId, request, null, requireSettings);
