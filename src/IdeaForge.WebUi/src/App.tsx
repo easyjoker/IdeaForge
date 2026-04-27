@@ -513,6 +513,11 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
     setRepositories(await api.listRepositories(projectId));
   }
 
+  async function selectCompany(company: ClientCompanyDto) {
+    setSelectedCompany(company);
+    await loadProjects(company.id);
+  }
+
   async function saveCompany(values: CompanyFormValues) {
     try {
       if (editingCompany) {
@@ -523,8 +528,16 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
         });
         messageApi.success("Company updated");
       } else {
+        const existingCompany = findCompanyByKey(companies, values.key);
+        if (existingCompany) {
+          setCompanyOpen(false);
+          await selectCompany(existingCompany);
+          messageApi.warning(`Company key "${existingCompany.key}" already exists. Selected the existing company.`);
+          return;
+        }
+
         await api.createCompany({
-          key: values.key ?? "",
+          key: values.key?.trim() ?? "",
           name: values.name,
           description: emptyToUndefined(values.description)
         });
@@ -534,6 +547,19 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
       setCompanyOpen(false);
       await loadCompanies();
     } catch (error) {
+      if (!editingCompany && isAlreadyExistsError(error) && values.key) {
+        try {
+          const existingCompany = await api.getCompanyByKey(values.key);
+          setCompanyOpen(false);
+          await loadCompanies();
+          await selectCompany(existingCompany);
+          messageApi.warning(`Company key "${existingCompany.key}" already exists. Selected the existing company.`);
+          return;
+        } catch {
+          // Fall through to the original API error when the duplicate cannot be loaded.
+        }
+      }
+
       messageApi.error(toErrorMessage(error));
     }
   }
@@ -688,8 +714,7 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
                         size="small"
                         type={record.id === selectedCompany?.id ? "primary" : "default"}
                         onClick={() => {
-                          setSelectedCompany(record);
-                          void loadProjects(record.id);
+                          void selectCompany(record);
                         }}
                       >
                         Select
@@ -805,7 +830,23 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
       <Modal title={editingCompany ? "Update company" : "Create company"} open={companyOpen} onCancel={() => setCompanyOpen(false)} footer={null} destroyOnHidden>
         <Form form={companyForm} layout="vertical" onFinish={saveCompany}>
           {!editingCompany && (
-            <Form.Item name="key" label="Key" rules={[{ required: true, message: "Company key is required" }]}>
+            <Form.Item
+              name="key"
+              label="Key"
+              extra="Key must be unique. If it already exists, submit will select the existing company instead."
+              rules={[
+                { required: true, message: "Company key is required" },
+                {
+                  warningOnly: true,
+                  validator: (_, value) => {
+                    const existingCompany = findCompanyByKey(companies, value);
+                    return existingCompany
+                      ? Promise.reject(new Error(`Key already exists. Existing company: ${existingCompany.name}`))
+                      : Promise.resolve();
+                  }
+                }
+              ]}
+            >
               <Input placeholder="contoso" />
             </Form.Item>
           )}
@@ -949,6 +990,21 @@ function parseList(value?: string) {
 function emptyToUndefined(value?: string) {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+}
+
+function findCompanyByKey(companies: ClientCompanyDto[], key?: unknown) {
+  const normalizedKey = normalizeKey(key);
+  return normalizedKey ? companies.find((company) => normalizeKey(company.key) === normalizedKey) : undefined;
+}
+
+function normalizeKey(value?: unknown) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
+}
+
+function isAlreadyExistsError(error: unknown) {
+  return toErrorMessage(error).toLowerCase().includes("already exists");
 }
 
 function toErrorMessage(error: unknown) {

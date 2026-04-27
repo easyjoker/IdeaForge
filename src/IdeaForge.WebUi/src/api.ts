@@ -82,6 +82,7 @@ export const api = {
       body: JSON.stringify({ prompt })
     }),
   listCompanies: () => request<ClientCompanyDto[]>("/client-companies"),
+  getCompanyByKey: (key: string) => request<ClientCompanyDto>(`/client-companies/by-key/${encodeURIComponent(key)}`),
   createCompany: (body: CreateClientCompanyRequest) =>
     request<ClientCompanyDto>("/client-companies", {
       method: "POST",
