@@ -22,6 +22,11 @@ The project currently supports two provider paths:
 - [API Guide](docs/api.md)
 - [Development Guide](docs/development.md)
 
+## Provider References
+
+- [GitHub Copilot CLI programmatic reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference)
+- [OpenAI Codex CLI reference](https://developers.openai.com/codex/cli/reference)
+
 ## Requirements
 
 - .NET 10 SDK

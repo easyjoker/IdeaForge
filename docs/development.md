@@ -75,6 +75,11 @@ POST http://localhost:5246/api/agents/by-key/docs-writer/chat
 
 Both wrapper scripts can report executions back to the Web API.
 
+Official references:
+
+- [GitHub Copilot CLI programmatic reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference)
+- [OpenAI Codex CLI reference](https://developers.openai.com/codex/cli/reference)
+
 Codex example:
 
 ```powershell
