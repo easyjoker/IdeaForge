@@ -37,6 +37,19 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
         return entity is null ? null : Map(entity);
     }
 
+    public async Task<Person?> GetPersonByKindAndDisplayNameAsync(PersonKind kind, string displayName, CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var normalizedDisplayName = displayName.Trim().ToLower();
+        var entity = await dbContext.Persons
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                person => person.Kind == (short)kind && person.DisplayName.ToLower() == normalizedDisplayName,
+                cancellationToken);
+
+        return entity is null ? null : Map(entity);
+    }
+
     public async Task<Person> AddPersonAsync(Person person, CancellationToken cancellationToken = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);

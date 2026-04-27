@@ -46,6 +46,7 @@ public sealed class PeopleController : ControllerBase
     [HttpPost]
     [ProducesResponseType<PersonDirectoryDto>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<PersonDirectoryDto>> CreateAsync(
         [FromBody] CreatePersonRequest request,
         CancellationToken cancellationToken)
@@ -58,6 +59,10 @@ public sealed class PeopleController : ControllerBase
         catch (ArgumentException exception)
         {
             return BadRequest(CreateProblem("Invalid person request", exception, StatusCodes.Status400BadRequest));
+        }
+        catch (InvalidOperationException exception)
+        {
+            return Conflict(CreateProblem("Person conflict", exception, StatusCodes.Status409Conflict));
         }
     }
 

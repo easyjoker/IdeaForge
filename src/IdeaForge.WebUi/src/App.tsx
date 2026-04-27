@@ -35,7 +35,7 @@ import {
   SettingOutlined,
   UserOutlined
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, getApiBaseUrl, setApiBaseUrl } from "./api";
 import {
   AgentProviderKind,
@@ -276,9 +276,11 @@ function Shell() {
 function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.useMessage>[0] }) {
   const [people, setPeople] = useState<PersonDirectoryDto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [savingPerson, setSavingPerson] = useState(false);
   const [open, setOpen] = useState(false);
   const [editingPerson, setEditingPerson] = useState<PersonDirectoryDto>();
   const [personForm] = Form.useForm<PersonFormValues>();
+  const personSaveInFlightRef = useRef(false);
 
   useEffect(() => {
     void loadPeople();
@@ -296,6 +298,13 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
   }
 
   async function savePerson(values: PersonFormValues) {
+    if (personSaveInFlightRef.current) {
+      return;
+    }
+
+    personSaveInFlightRef.current = true;
+    setSavingPerson(true);
+
     try {
       if (editingPerson) {
         await api.updatePerson(editingPerson.id, {
@@ -321,6 +330,9 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
       await loadPeople();
     } catch (error) {
       messageApi.error(toErrorMessage(error));
+    } finally {
+      personSaveInFlightRef.current = false;
+      setSavingPerson(false);
     }
   }
 
@@ -426,7 +438,7 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
           <Form.Item name="description" label="Description">
             <Input.TextArea rows={3} placeholder="Person profile, responsibility, or background." />
           </Form.Item>
-          <Button type="primary" htmlType="submit" block>
+          <Button type="primary" htmlType="submit" block loading={savingPerson} disabled={savingPerson}>
             {editingPerson ? "Update Person" : "Create Person"}
           </Button>
         </Form>

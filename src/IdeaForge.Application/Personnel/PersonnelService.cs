@@ -28,11 +28,18 @@ public sealed class PersonnelService : IPersonnelService
         ArgumentNullException.ThrowIfNull(request);
         EnsureSupportedKind(request.Kind);
 
+        var displayName = RequireText(request.DisplayName, nameof(request.DisplayName));
+        var existingPerson = await _repository.GetPersonByKindAndDisplayNameAsync(request.Kind, displayName, cancellationToken);
+        if (existingPerson is not null)
+        {
+            throw new InvalidOperationException($"Person '{displayName}' already exists for kind '{request.Kind}'.");
+        }
+
         var now = DateTimeOffset.UtcNow;
         var person = new Person
         {
             Kind = request.Kind,
-            DisplayName = RequireText(request.DisplayName, nameof(request.DisplayName)),
+            DisplayName = displayName,
             Description = NormalizeOptional(request.Description),
             Metadata = NormalizeMetadata(request.Metadata),
             CreatedAtUtc = now,

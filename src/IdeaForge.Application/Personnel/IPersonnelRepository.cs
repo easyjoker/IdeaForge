@@ -8,6 +8,8 @@ public interface IPersonnelRepository
 
     Task<Person?> GetPersonAsync(Guid id, CancellationToken cancellationToken = default);
 
+    Task<Person?> GetPersonByKindAndDisplayNameAsync(PersonKind kind, string displayName, CancellationToken cancellationToken = default);
+
     Task<Person> AddPersonAsync(Person person, CancellationToken cancellationToken = default);
 
     Task<Person?> UpdatePersonAsync(Person person, CancellationToken cancellationToken = default);
