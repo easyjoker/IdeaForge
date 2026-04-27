@@ -12,6 +12,87 @@ Swagger is available at:
 http://localhost:5246/swagger
 ```
 
+## Create Person
+
+Endpoint:
+
+```http
+POST /api/people
+```
+
+Example body:
+
+```json
+{
+  "kind": 2,
+  "displayName": "Docs Writer",
+  "description": "AI person that writes and maintains project documentation.",
+  "metadata": {}
+}
+```
+
+Person kind values:
+
+- `1` = `Human`
+- `2` = `AI`
+
+## List People
+
+Endpoint:
+
+```http
+GET /api/people
+```
+
+## Set Employee Role
+
+Endpoint:
+
+```http
+POST /api/employees
+```
+
+Example body for a human person:
+
+```json
+{
+  "personId": "00000000-0000-0000-0000-000000000000",
+  "key": "backend-lead",
+  "role": "Backend Lead",
+  "mission": "Own backend architecture decisions.",
+  "specialties": ["dotnet", "postgresql"],
+  "metadata": {}
+}
+```
+
+Example body for an AI person:
+
+```json
+{
+  "personId": "00000000-0000-0000-0000-000000000000",
+  "key": "docs-writer",
+  "role": "Documentation Agent",
+  "mission": "Keep ideaForge documentation accurate and useful.",
+  "specialties": ["documentation", "api", "developer-experience"],
+  "metadata": {},
+  "agentSettings": {
+    "provider": 2,
+    "model": "gpt-5.4",
+    "systemPrompt": "Answer in concise Traditional Chinese."
+  }
+}
+```
+
+The `agentSettings` object is only used for AI people.
+
+## List Employees
+
+Endpoint:
+
+```http
+GET /api/employees
+```
+
 ## Create Agent
 
 Endpoint:

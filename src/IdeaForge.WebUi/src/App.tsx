@@ -26,12 +26,14 @@ import {
   ApiOutlined,
   ApartmentOutlined,
   CloudServerOutlined,
+  IdcardOutlined,
   MessageOutlined,
   PlusOutlined,
   ReloadOutlined,
   RobotOutlined,
   SaveOutlined,
-  SettingOutlined
+  SettingOutlined,
+  UserOutlined
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { api, getApiBaseUrl, setApiBaseUrl } from "./api";
@@ -39,10 +41,13 @@ import {
   AgentProviderKind,
   AgentStatus,
   ClientResourceStatus,
+  PersonKind,
   type AgentConversationResponse,
   type AgentProfileDto,
   type ClientCompanyDto,
   type ClientProjectDto,
+  type EmployeeDirectoryDto,
+  type PersonDirectoryDto,
   type ProjectRepositoryDto
 } from "./types";
 
@@ -57,6 +62,24 @@ type AgentFormValues = {
   mission?: string;
   specialtiesText?: string;
   provider: AgentProviderKind;
+  model?: string;
+  systemPrompt?: string;
+};
+
+type PersonFormValues = {
+  kind: PersonKind;
+  displayName: string;
+  description?: string;
+};
+
+type EmployeeFormValues = {
+  personId: string;
+  key: string;
+  role?: string;
+  mission?: string;
+  status?: AgentStatus;
+  specialtiesText?: string;
+  provider?: AgentProviderKind;
   model?: string;
   systemPrompt?: string;
 };
@@ -89,6 +112,18 @@ const providerLabel: Record<AgentProviderKind, string> = {
   [AgentProviderKind.Unknown]: "Unknown",
   [AgentProviderKind.Copilot]: "Copilot",
   [AgentProviderKind.Codex]: "Codex"
+};
+
+const personKindLabel: Record<PersonKind, string> = {
+  [PersonKind.Unknown]: "Unknown",
+  [PersonKind.Human]: "Human",
+  [PersonKind.Ai]: "AI"
+};
+
+const personKindColor: Record<PersonKind, string> = {
+  [PersonKind.Unknown]: "default",
+  [PersonKind.Human]: "cyan",
+  [PersonKind.Ai]: "geekblue"
 };
 
 const statusLabel: Record<AgentStatus | ClientResourceStatus, string> = {
@@ -166,7 +201,7 @@ function Shell() {
             <Text className="eyebrow">POC workspace</Text>
             <Title className="hero-title">把 Swagger 操作收斂成用戶能直接使用的工作台</Title>
             <Paragraph className="hero-copy">
-              管理員工型 agent、客戶公司、客戶系統與 repository 設定，讓下一步任務指派可以落在明確的服務範圍。
+              先建立人員，再設定員工職務；只有 AI 人員會出現 LLM 與 agent 設定，讓公司營運與執行任務的資料邊界清楚分開。
             </Paragraph>
           </div>
           <Card className="api-card">
@@ -192,6 +227,26 @@ function Shell() {
           className="workspace-tabs"
           items={[
             {
+              key: "people",
+              label: (
+                <Space>
+                  <UserOutlined />
+                  新增人員
+                </Space>
+              ),
+              children: <PeoplePanel messageApi={messageApi} />
+            },
+            {
+              key: "employees",
+              label: (
+                <Space>
+                  <IdcardOutlined />
+                  設定職務
+                </Space>
+              ),
+              children: <EmployeeAssignmentsPanel messageApi={messageApi} />
+            },
+            {
               key: "agents",
               label: (
                 <Space>
@@ -215,6 +270,403 @@ function Shell() {
         />
       </Content>
     </Layout>
+  );
+}
+
+function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.useMessage>[0] }) {
+  const [people, setPeople] = useState<PersonDirectoryDto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [editingPerson, setEditingPerson] = useState<PersonDirectoryDto>();
+  const [personForm] = Form.useForm<PersonFormValues>();
+
+  useEffect(() => {
+    void loadPeople();
+  }, []);
+
+  async function loadPeople() {
+    setLoading(true);
+    try {
+      setPeople(await api.listPeople());
+    } catch (error) {
+      messageApi.error(toErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function savePerson(values: PersonFormValues) {
+    try {
+      if (editingPerson) {
+        await api.updatePerson(editingPerson.id, {
+          kind: values.kind,
+          displayName: values.displayName,
+          description: emptyToUndefined(values.description),
+          metadata: editingPerson.metadata ?? {}
+        });
+        messageApi.success("Person updated");
+      } else {
+        await api.createPerson({
+          kind: values.kind,
+          displayName: values.displayName,
+          description: emptyToUndefined(values.description),
+          metadata: {}
+        });
+        messageApi.success("Person created");
+      }
+
+      setOpen(false);
+      setEditingPerson(undefined);
+      personForm.resetFields();
+      await loadPeople();
+    } catch (error) {
+      messageApi.error(toErrorMessage(error));
+    }
+  }
+
+  function openPersonForm(person?: PersonDirectoryDto) {
+    setEditingPerson(person);
+    personForm.resetFields();
+    personForm.setFieldsValue(
+      person
+        ? {
+            kind: person.kind,
+            displayName: person.displayName,
+            description: person.description
+          }
+        : {
+            kind: PersonKind.Human
+          }
+    );
+    setOpen(true);
+  }
+
+  return (
+    <Space direction="vertical" size="large" className="full-width">
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={8}>
+          <Card className="metric-card">
+            <Statistic title="People" value={people.length} prefix={<UserOutlined />} />
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card className="metric-card">
+            <Statistic title="Human" value={people.filter((item) => item.kind === PersonKind.Human).length} />
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card className="metric-card">
+            <Statistic title="AI" value={people.filter((item) => item.kind === PersonKind.Ai).length} prefix={<RobotOutlined />} />
+          </Card>
+        </Col>
+      </Row>
+
+      <Card
+        title="People directory"
+        extra={
+          <Space>
+            <Button icon={<ReloadOutlined />} onClick={loadPeople}>
+              Refresh
+            </Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => openPersonForm()}>
+              New Person
+            </Button>
+          </Space>
+        }
+      >
+        <Table<PersonDirectoryDto>
+          rowKey="id"
+          loading={loading}
+          dataSource={people}
+          pagination={{ pageSize: 8 }}
+          columns={[
+            {
+              title: "Person",
+              render: (_, record) => (
+                <Space direction="vertical" size={0}>
+                  <Text strong>{record.displayName}</Text>
+                  <Text type="secondary">{record.description ?? "No description"}</Text>
+                </Space>
+              )
+            },
+            {
+              title: "Kind",
+              render: (_, record) => renderPersonKind(record.kind)
+            },
+            {
+              title: "Action",
+              render: (_, record) => (
+                <Button size="small" onClick={() => openPersonForm(record)}>
+                  Edit
+                </Button>
+              )
+            }
+          ]}
+        />
+      </Card>
+
+      <Modal title={editingPerson ? "Update person" : "Create person"} open={open} onCancel={() => setOpen(false)} footer={null} destroyOnHidden>
+        <Form form={personForm} layout="vertical" onFinish={savePerson}>
+          <Form.Item
+            name="kind"
+            label="Person Type"
+            extra="AI people can receive LLM agent settings later in the employee role page."
+            rules={[{ required: true, message: "Person type is required" }]}
+          >
+            <Select
+              options={[
+                { label: "Human", value: PersonKind.Human },
+                { label: "AI", value: PersonKind.Ai }
+              ]}
+            />
+          </Form.Item>
+          <Form.Item name="displayName" label="Display Name" rules={[{ required: true, message: "Display name is required" }]}>
+            <Input placeholder="Jane Chen or Docs Writer" />
+          </Form.Item>
+          <Form.Item name="description" label="Description">
+            <Input.TextArea rows={3} placeholder="Person profile, responsibility, or background." />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" block>
+            {editingPerson ? "Update Person" : "Create Person"}
+          </Button>
+        </Form>
+      </Modal>
+    </Space>
+  );
+}
+
+function EmployeeAssignmentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.useMessage>[0] }) {
+  const [people, setPeople] = useState<PersonDirectoryDto[]>([]);
+  const [employees, setEmployees] = useState<EmployeeDirectoryDto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<EmployeeDirectoryDto>();
+  const [employeeForm] = Form.useForm<EmployeeFormValues>();
+  const watchedPersonId = Form.useWatch("personId", employeeForm);
+  const selectedPerson = editingEmployee?.person ?? people.find((person) => person.id === watchedPersonId);
+  const selectedPersonIsAi = selectedPerson?.kind === PersonKind.Ai;
+
+  useEffect(() => {
+    void loadDirectory();
+  }, []);
+
+  async function loadDirectory() {
+    setLoading(true);
+    try {
+      const [nextPeople, nextEmployees] = await Promise.all([api.listPeople(), api.listEmployees()]);
+      setPeople(nextPeople);
+      setEmployees(nextEmployees);
+    } catch (error) {
+      messageApi.error(toErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function saveEmployee(values: EmployeeFormValues) {
+    try {
+      if (editingEmployee) {
+        await api.updateEmployee(editingEmployee.id, {
+          key: values.key,
+          role: emptyToUndefined(values.role),
+          mission: emptyToUndefined(values.mission),
+          status: values.status ?? AgentStatus.Active,
+          specialties: parseList(values.specialtiesText),
+          metadata: editingEmployee.metadata ?? {},
+          agentSettings: selectedPersonIsAi ? buildAgentSettings(values) : undefined
+        });
+        messageApi.success("Employee role updated");
+      } else {
+        await api.createEmployee({
+          personId: values.personId,
+          key: values.key,
+          role: emptyToUndefined(values.role),
+          mission: emptyToUndefined(values.mission),
+          specialties: parseList(values.specialtiesText),
+          metadata: {},
+          agentSettings: selectedPersonIsAi ? buildAgentSettings(values) : undefined
+        });
+        messageApi.success("Employee role created");
+      }
+
+      setOpen(false);
+      setEditingEmployee(undefined);
+      employeeForm.resetFields();
+      await loadDirectory();
+    } catch (error) {
+      messageApi.error(toErrorMessage(error));
+    }
+  }
+
+  function openEmployeeForm(employee?: EmployeeDirectoryDto) {
+    setEditingEmployee(employee);
+    employeeForm.resetFields();
+    employeeForm.setFieldsValue(
+      employee
+        ? {
+            personId: employee.person.id,
+            key: employee.key,
+            role: employee.role,
+            mission: employee.mission,
+            status: employee.status,
+            specialtiesText: employee.specialties.join(", "),
+            provider: employee.agentSettings?.provider ?? AgentProviderKind.Codex,
+            model: employee.agentSettings?.model ?? "gpt-5.4",
+            systemPrompt: employee.agentSettings?.systemPrompt
+          }
+        : {
+            status: AgentStatus.Active,
+            provider: AgentProviderKind.Codex,
+            model: "gpt-5.4"
+          }
+    );
+    setOpen(true);
+  }
+
+  const assignedPersonIds = new Set(employees.map((employee) => employee.person.id));
+  const availablePeople = people.filter((person) => editingEmployee?.person.id === person.id || !assignedPersonIds.has(person.id));
+
+  return (
+    <Space direction="vertical" size="large" className="full-width">
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={8}>
+          <Card className="metric-card">
+            <Statistic title="Employees" value={employees.length} prefix={<IdcardOutlined />} />
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card className="metric-card">
+            <Statistic title="AI Employees" value={employees.filter((item) => item.person.kind === PersonKind.Ai).length} prefix={<RobotOutlined />} />
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card className="metric-card">
+            <Statistic title="Unassigned People" value={people.length - employees.length} />
+          </Card>
+        </Col>
+      </Row>
+
+      <Card
+        title="Employee role assignments"
+        extra={
+          <Space>
+            <Button icon={<ReloadOutlined />} onClick={loadDirectory}>
+              Refresh
+            </Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => openEmployeeForm()} disabled={availablePeople.length === 0}>
+              New Role
+            </Button>
+          </Space>
+        }
+      >
+        <Table<EmployeeDirectoryDto>
+          rowKey="id"
+          loading={loading}
+          dataSource={employees}
+          pagination={{ pageSize: 8 }}
+          columns={[
+            {
+              title: "Employee",
+              render: (_, record) => (
+                <Space direction="vertical" size={0}>
+                  <Text strong>{record.person.displayName}</Text>
+                  <Text type="secondary">{record.key}</Text>
+                </Space>
+              )
+            },
+            {
+              title: "Type",
+              render: (_, record) => renderPersonKind(record.person.kind)
+            },
+            {
+              title: "Role",
+              render: (_, record) => record.role ?? <Text type="secondary">Not set</Text>
+            },
+            {
+              title: "AI Settings",
+              render: (_, record) =>
+                record.agentSettings ? (
+                  <Space>
+                    <Tag>{providerLabel[record.agentSettings.provider]}</Tag>
+                    <Text code>{record.agentSettings.model}</Text>
+                  </Space>
+                ) : (
+                  <Text type="secondary">Human role</Text>
+                )
+            },
+            {
+              title: "Status",
+              render: (_, record) => renderStatus(record.status)
+            },
+            {
+              title: "Action",
+              render: (_, record) => (
+                <Button size="small" onClick={() => openEmployeeForm(record)}>
+                  Edit
+                </Button>
+              )
+            }
+          ]}
+        />
+      </Card>
+
+      <Modal title={editingEmployee ? "Update role" : "Set employee role"} open={open} onCancel={() => setOpen(false)} footer={null} destroyOnHidden width={720}>
+        <Form form={employeeForm} layout="vertical" onFinish={saveEmployee}>
+          <Form.Item name="personId" label="Person" rules={[{ required: true, message: "Person is required" }]}>
+            <Select
+              disabled={!!editingEmployee}
+              placeholder="Select a person"
+              options={availablePeople.map((person) => ({
+                label: `${person.displayName} (${personKindLabel[person.kind]})`,
+                value: person.id
+              }))}
+            />
+          </Form.Item>
+          <Form.Item name="key" label="Employee Key" rules={[{ required: true, message: "Employee key is required" }]}>
+            <Input placeholder="docs-writer" />
+          </Form.Item>
+          <Form.Item name="role" label="Role">
+            <Input placeholder="Documentation Agent or Backend Engineer" />
+          </Form.Item>
+          <Form.Item name="mission" label="Mission">
+            <Input.TextArea rows={2} placeholder="Long-term responsibility for this employee." />
+          </Form.Item>
+          {editingEmployee && <StatusField />}
+          <Form.Item name="specialtiesText" label="Specialties">
+            <Input placeholder="documentation, api, review" />
+          </Form.Item>
+
+          {selectedPersonIsAi && (
+            <Card size="small" title="AI Agent Settings" className="embedded-card">
+              <Form.Item name="provider" label="Provider" rules={[{ required: true, message: "Provider is required for AI people" }]}>
+                <Select
+                  options={[
+                    { label: "Copilot", value: AgentProviderKind.Copilot },
+                    { label: "Codex", value: AgentProviderKind.Codex }
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item name="model" label="Model">
+                <Input placeholder="gpt-5.4" />
+              </Form.Item>
+              <Form.Item name="systemPrompt" label="System Prompt">
+                <Input.TextArea rows={3} placeholder="Optional instructions for this AI employee." />
+              </Form.Item>
+            </Card>
+          )}
+
+          {!selectedPersonIsAi && selectedPerson && (
+            <Card size="small" className="embedded-card">
+              <Text type="secondary">This is a human person, so no AI provider/model settings are required.</Text>
+            </Card>
+          )}
+
+          <Button type="primary" htmlType="submit" block>
+            {editingEmployee ? "Update Role" : "Create Role"}
+          </Button>
+        </Form>
+      </Modal>
+    </Space>
   );
 }
 
@@ -984,6 +1436,18 @@ function StatusField() {
 
 function renderStatus(status: AgentStatus | ClientResourceStatus) {
   return <Tag color={statusColor[status]}>{statusLabel[status]}</Tag>;
+}
+
+function renderPersonKind(kind: PersonKind) {
+  return <Tag color={personKindColor[kind]}>{personKindLabel[kind]}</Tag>;
+}
+
+function buildAgentSettings(values: EmployeeFormValues) {
+  return {
+    provider: values.provider ?? AgentProviderKind.Codex,
+    model: emptyToUndefined(values.model),
+    systemPrompt: emptyToUndefined(values.systemPrompt)
+  };
 }
 
 function parseList(value?: string) {

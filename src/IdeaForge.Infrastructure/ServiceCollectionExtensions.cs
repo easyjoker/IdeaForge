@@ -1,8 +1,10 @@
 using IdeaForge.Application.Agents;
 using IdeaForge.Application.ClientProjects;
+using IdeaForge.Application.Personnel;
 using IdeaForge.Infrastructure.Agents;
 using IdeaForge.Infrastructure.ClientProjects;
 using IdeaForge.Infrastructure.Persistence;
+using IdeaForge.Infrastructure.Personnel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPostgreSqlInitializer, PostgreSqlInitializer>();
         services.AddScoped<IAgentProfileRepository, PostgreSqlAgentProfileRepository>();
         services.AddScoped<IClientProjectRepository, EfCoreClientProjectRepository>();
+        services.AddScoped<IPersonnelRepository, EfCorePersonnelRepository>();
         return services;
     }
 }

@@ -34,6 +34,8 @@ export type PersonDto = {
   updatedAtUtc: string;
 };
 
+export type PersonDirectoryDto = PersonDto;
+
 export type EmployeeDto = {
   id: string;
   personId: string;
@@ -60,6 +62,57 @@ export type AgentProfileDto = {
   person: PersonDto;
   employee: EmployeeDto;
   agentData: AgentDataDto;
+};
+
+export type AgentSettingsDto = AgentDataDto;
+
+export type EmployeeDirectoryDto = {
+  person: PersonDirectoryDto;
+  id: string;
+  key: string;
+  role?: string;
+  mission?: string;
+  status: AgentStatus;
+  specialties: string[];
+  metadata: Record<string, string>;
+  agentSettings?: AgentSettingsDto;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+};
+
+export type CreatePersonRequest = {
+  kind: PersonKind;
+  displayName: string;
+  description?: string;
+  metadata: Record<string, string>;
+};
+
+export type UpdatePersonRequest = CreatePersonRequest;
+
+export type UpsertAgentSettingsRequest = {
+  provider: AgentProviderKind;
+  model?: string;
+  systemPrompt?: string;
+};
+
+export type CreateEmployeeRequest = {
+  personId: string;
+  key: string;
+  role?: string;
+  mission?: string;
+  specialties: string[];
+  metadata: Record<string, string>;
+  agentSettings?: UpsertAgentSettingsRequest;
+};
+
+export type UpdateEmployeeRequest = {
+  key: string;
+  role?: string;
+  mission?: string;
+  status: AgentStatus;
+  specialties: string[];
+  metadata: Record<string, string>;
+  agentSettings?: UpsertAgentSettingsRequest;
 };
 
 export type CreateAgentProfileRequest = {

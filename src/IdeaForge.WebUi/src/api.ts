@@ -1,14 +1,20 @@
 import type {
   AgentConversationResponse,
   AgentProfileDto,
+  CreateEmployeeRequest,
   CreateAgentProfileRequest,
   CreateClientCompanyRequest,
+  CreatePersonRequest,
   CreateClientProjectRequest,
   CreateProjectRepositoryRequest,
   ClientCompanyDto,
   ClientProjectDto,
+  EmployeeDirectoryDto,
+  PersonDirectoryDto,
   ProjectRepositoryDto,
+  UpdateEmployeeRequest,
   UpdateClientCompanyRequest,
+  UpdatePersonRequest,
   UpdateClientProjectRequest,
   UpdateProjectRepositoryRequest
 } from "./types";
@@ -71,6 +77,28 @@ function normalizeBaseUrl(value: string) {
 
 export const api = {
   listAgents: () => request<AgentProfileDto[]>("/agents"),
+  listPeople: () => request<PersonDirectoryDto[]>("/people"),
+  createPerson: (body: CreatePersonRequest) =>
+    request<PersonDirectoryDto>("/people", {
+      method: "POST",
+      body: JSON.stringify(body)
+    }),
+  updatePerson: (id: string, body: UpdatePersonRequest) =>
+    request<PersonDirectoryDto>(`/people/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body)
+    }),
+  listEmployees: () => request<EmployeeDirectoryDto[]>("/employees"),
+  createEmployee: (body: CreateEmployeeRequest) =>
+    request<EmployeeDirectoryDto>("/employees", {
+      method: "POST",
+      body: JSON.stringify(body)
+    }),
+  updateEmployee: (id: string, body: UpdateEmployeeRequest) =>
+    request<EmployeeDirectoryDto>(`/employees/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body)
+    }),
   createAgent: (body: CreateAgentProfileRequest) =>
     request<AgentProfileDto>("/agents", {
       method: "POST",

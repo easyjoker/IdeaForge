@@ -51,6 +51,7 @@ Provides provider registration and lookup through:
 Contains use cases and application-facing DTOs:
 
 - creating and updating AI employee agents
+- creating people separately from employee role assignments
 - reporting completed executions
 - sending chat prompts to a selected employee
 - mapping domain models to API DTOs

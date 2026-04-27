@@ -99,9 +99,11 @@ Client delivery settings use this hierarchy:
 
 ## Main API Flow
 
-1. Create an AI employee agent with `POST /api/agents`.
-2. Send a prompt to that employee with `POST /api/agents/by-key/{key}/chat`.
-3. Read execution history with `GET /api/agents/by-key/{key}/executions`.
+1. Create a person with `POST /api/people`.
+2. Set that person's employee role with `POST /api/employees`.
+3. Include `agentSettings` only when the selected person is AI.
+4. Send a prompt to that AI employee with `POST /api/agents/by-key/{key}/chat`.
+5. Read execution history with `GET /api/agents/by-key/{key}/executions`.
 
 The chat endpoint executes the configured provider and persists the execution result automatically.
 
