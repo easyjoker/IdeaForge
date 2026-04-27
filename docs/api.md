@@ -170,3 +170,164 @@ Example:
 ```http
 GET /api/agents/by-key/docs-writer/executions
 ```
+
+## Create Client Company
+
+Endpoint:
+
+```http
+POST /api/client-companies
+```
+
+Example body:
+
+```json
+{
+  "key": "contoso",
+  "name": "Contoso Ltd.",
+  "description": "Primary POC client company."
+}
+```
+
+Status defaults to `Active` when creating a company.
+
+## List Client Companies
+
+Endpoint:
+
+```http
+GET /api/client-companies
+```
+
+## Get Client Company By Key
+
+Endpoint:
+
+```http
+GET /api/client-companies/by-key/{key}
+```
+
+Example:
+
+```http
+GET /api/client-companies/by-key/contoso
+```
+
+## Update Client Company
+
+Endpoint:
+
+```http
+PUT /api/client-companies/{id}
+```
+
+Example body:
+
+```json
+{
+  "name": "Contoso Ltd.",
+  "description": "Primary POC client company.",
+  "status": 1
+}
+```
+
+Client resource status values:
+
+- `0` = `Draft`
+- `1` = `Active`
+- `2` = `Disabled`
+- `3` = `Archived`
+
+## Create Client Project
+
+Endpoint:
+
+```http
+POST /api/client-companies/{companyId}/projects
+```
+
+Example body:
+
+```json
+{
+  "key": "commerce-platform",
+  "name": "Commerce Platform",
+  "description": "Customer-facing commerce modernization project."
+}
+```
+
+## List Client Projects
+
+Endpoint:
+
+```http
+GET /api/client-companies/{companyId}/projects
+```
+
+## Update Client Project
+
+Endpoint:
+
+```http
+PUT /api/client-projects/{id}
+```
+
+Example body:
+
+```json
+{
+  "name": "Commerce Platform",
+  "description": "Customer-facing commerce modernization project.",
+  "status": 1
+}
+```
+
+## Create Project Repository
+
+Endpoint:
+
+```http
+POST /api/client-projects/{projectId}/repositories
+```
+
+Example body:
+
+```json
+{
+  "key": "order-service",
+  "name": "Order Service",
+  "remoteRepositoryUrl": "https://github.com/contoso/order-service.git",
+  "localPath": "D:\\projects\\clients\\contoso\\order-service",
+  "gitStrategySkillPath": ".codex/skills/git-strategy/SKILL.md",
+  "description": "Order workflow microservice."
+}
+```
+
+## List Project Repositories
+
+Endpoint:
+
+```http
+GET /api/client-projects/{projectId}/repositories
+```
+
+## Update Project Repository
+
+Endpoint:
+
+```http
+PUT /api/project-repositories/{id}
+```
+
+Example body:
+
+```json
+{
+  "name": "Order Service",
+  "remoteRepositoryUrl": "https://github.com/contoso/order-service.git",
+  "localPath": "D:\\projects\\clients\\contoso\\order-service",
+  "gitStrategySkillPath": ".codex/skills/git-strategy/SKILL.md",
+  "description": "Order workflow microservice.",
+  "status": 1
+}
+```
