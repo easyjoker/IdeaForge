@@ -1,69 +1,98 @@
 # ideaForge
 
-ideaForge 是一家以 Agent 為核心交付模式的軟體公司，專注於將產品策略、設計、開發、測試與交付流程系統化，協助企業更快把想法鍛造成可上線的產品。
+ideaForge is a software company and engineering platform built around employee-style AI agents. The current repository contains the first service foundation for defining agents, assigning LLM providers, executing prompts, and persisting runtime history in PostgreSQL.
 
-我們結合 AI Agents 與資深工程實務，打造可擴展、可追蹤、可持續迭代的開發流程，讓團隊能以更高效率完成從概念驗證到正式上線的整體專案。
+The project currently supports two provider paths:
 
-## 我們是誰
+- GitHub Copilot through the Copilot SDK and `copilot-agent.ps1`
+- OpenAI Codex through the Codex CLI and `codex-agent.ps1`
 
-ideaForge 的核心理念是：
+## What This Repository Contains
 
-- 用 Agent 提升軟體團隊的執行效率
-- 用工程紀律確保交付品質
-- 用清晰流程降低協作成本
+- Reusable C# agent packages under `src/IdeaForge.Agents.*`
+- ASP.NET Core 10 Web API under `src/IdeaForge.WebApi`
+- Application layer use cases under `src/IdeaForge.Application`
+- PostgreSQL persistence under `src/IdeaForge.Infrastructure`
+- Database schema under `db/postgresql`
+- PowerShell wrappers for Copilot and Codex execution
 
-我們相信，未來的軟體公司不只是「人寫程式」，而是由人與 Agents 協同完成需求分析、技術規劃、程式實作、文件撰寫、測試驗證與持續優化。
+## Documentation
 
-## 我們提供的服務
+- [Architecture](docs/architecture.md)
+- [API Guide](docs/api.md)
+- [Development Guide](docs/development.md)
 
-- 產品需求分析與技術規劃
-- Web / App / SaaS 系統開發
-- AI Agent 工作流程設計與導入
-- 既有系統重構與效能優化
-- 自動化測試與持續交付流程建置
-- 技術顧問與研發團隊協作支援
+## Requirements
 
-## 我們的工作方式
+- .NET 10 SDK
+- PostgreSQL on `localhost:5432`
+- Codex CLI available on `PATH` when using the Codex provider
+- GitHub Copilot authentication when using the Copilot provider
 
-在 ideaForge，每個專案都會以「人類決策 + Agent 執行」的方式推進：
+## Quick Start
 
-1. 定義目標  
-   釐清商業目標、使用者需求與交付範圍。
+Build the solution:
 
-2. 規劃方案  
-   由工程與產品角色拆解需求，建立技術架構與執行策略。
+```powershell
+dotnet build D:\projects\IdeaForge\IdeaForge.slnx
+```
 
-3. Agent 協作執行  
-   透過多種 Agent 支援文件產出、程式開發、除錯、測試與知識整理。
+Run the Web API:
 
-4. 人工審核與品質控管  
-   由開發者與決策者把關關鍵設計、品質標準與最終交付。
+```powershell
+dotnet run --project D:\projects\IdeaForge\src\IdeaForge.WebApi
+```
 
-5. 持續優化  
-   根據真實使用情境與業務需求持續調整產品。
+Open Swagger:
 
-## 為什麼選擇 ideaForge
+```text
+http://localhost:5246/swagger
+```
 
-- 更快的開發節奏：透過 Agent 加速重複性與高資訊密度工作
-- 更穩定的交付品質：保留工程審查、測試與架構治理
-- 更高的團隊槓桿：讓小型團隊也能高效推進複雜專案
-- 更清楚的知識沉澱：需求、決策、文件與程式碼可持續累積
+## Core Model
 
-## 適合的合作對象
+ideaForge separates an agent into three concerns:
 
-ideaForge 特別適合以下團隊或企業：
+- `employee`: stable identity and business role, such as name, key, mission, and specialties
+- `agent_data`: runtime configuration, such as provider, model, session id, and system prompt
+- `agent_executions`: historical records for completed prompt executions
 
-- 需要快速驗證新產品想法的新創團隊
-- 想導入 AI Agent 提升研發效率的公司
-- 需要重構舊系統並建立新流程的企業
-- 希望外部技術夥伴能直接參與落地執行的產品團隊
+This lets an employee behave like a dedicated specialist while still allowing runtime state to evolve after real executions.
 
-## 願景
+## Main API Flow
 
-我們希望把「想法」鍛造成真正可用、可擴展、可持續經營的數位產品。
+1. Create an employee-style agent with `POST /api/agents`.
+2. Send a prompt to that employee with `POST /api/agents/by-key/{key}/chat`.
+3. Read execution history with `GET /api/agents/by-key/{key}/executions`.
 
-ideaForge 不只是開發軟體，而是建立一套讓人與 Agent 能共同創造價值的交付系統。
+The chat endpoint executes the configured provider and persists the execution result automatically.
 
-## Contact
+## PowerShell Wrappers
 
-如果你想與我們合作，歡迎建立聯繫，一起把下一個想法打造成真正可上線的產品。
+Run Codex and report execution back to the API:
+
+```powershell
+.\codex-agent.ps1 `
+  -Prompt "Summarize this repository" `
+  -Json `
+  -EmployeeKey "docs-writer" `
+  -AgentApiBaseUrl "http://localhost:5246"
+```
+
+Run Copilot and report execution back to the API:
+
+```powershell
+.\copilot-agent.ps1 `
+  -Prompt "Review this repository" `
+  -OutputFormat json `
+  -EmployeeKey "reviewer" `
+  -AgentApiBaseUrl "http://localhost:5246"
+```
+
+Both wrappers default to `gpt-5.4`.
+
+## Notes
+
+- Swagger includes XML comments and enum descriptions for API discoverability.
+- Local PostgreSQL initialization runs when the Web API starts.
+- Development credentials should stay local. Use user secrets or environment variables before deploying beyond local development.

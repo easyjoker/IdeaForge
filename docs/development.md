@@ -1,0 +1,110 @@
+# Development Guide
+
+This guide describes how to run ideaForge locally.
+
+## Prerequisites
+
+- .NET 10 SDK
+- PostgreSQL available on `localhost:5432`
+- Codex CLI available on `PATH` when testing Codex execution
+- GitHub Copilot access when testing Copilot execution
+
+## Build
+
+```powershell
+dotnet build D:\projects\IdeaForge\IdeaForge.slnx
+```
+
+## Database
+
+The Web API reads `ConnectionStrings:IdeaForgeDb` from configuration.
+
+Local development currently uses:
+
+```text
+src/IdeaForge.WebApi/appsettings.Development.json
+```
+
+The startup initializer will:
+
+- create the configured database when it does not exist
+- execute `db/postgresql/001_agents.sql`
+- create `employees`, `agent_data`, and `agent_executions`
+
+For non-local environments, move credentials to user secrets, environment variables, or a secret manager.
+
+## Run Web API
+
+```powershell
+dotnet run --project D:\projects\IdeaForge\src\IdeaForge.WebApi
+```
+
+Default local URL:
+
+```text
+http://localhost:5246
+```
+
+Swagger:
+
+```text
+http://localhost:5246/swagger
+```
+
+## Common Verification
+
+Build the solution:
+
+```powershell
+dotnet build D:\projects\IdeaForge\IdeaForge.slnx
+```
+
+Check git status:
+
+```powershell
+git status --short
+```
+
+Create a sample agent through Swagger or with `IdeaForge.WebApi.http`, then call:
+
+```http
+POST http://localhost:5246/api/agents/by-key/docs-writer/chat
+```
+
+## PowerShell Wrappers
+
+Both wrapper scripts can report executions back to the Web API.
+
+Codex example:
+
+```powershell
+.\codex-agent.ps1 `
+  -Prompt "Summarize this repository" `
+  -Json `
+  -WorkingDirectory "D:\projects\IdeaForge" `
+  -EmployeeKey "docs-writer" `
+  -AgentApiBaseUrl "http://localhost:5246"
+```
+
+Copilot example:
+
+```powershell
+.\copilot-agent.ps1 `
+  -Prompt "Review this repository" `
+  -OutputFormat json `
+  -WorkingDirectory "D:\projects\IdeaForge" `
+  -EmployeeKey "reviewer" `
+  -AgentApiBaseUrl "http://localhost:5246"
+```
+
+Session behavior:
+
+- Copilot JSON output includes `sessionId`; the wrapper can capture and report it automatically.
+- Codex JSON output includes `thread_id`; the wrapper reports it as the session id.
+- Manual `-SessionId` takes precedence when provided.
+
+## Current Limitations
+
+- Codex provider execution through the C# provider does not yet resume an existing Codex session.
+- Copilot provider supports named sessions through the Copilot SDK.
+- Authentication for external LLM tools is handled outside this repository.

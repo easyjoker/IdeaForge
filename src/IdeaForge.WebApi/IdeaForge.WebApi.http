@@ -1,6 +1,79 @@
 @IdeaForge.WebApi_HostAddress = http://localhost:5246
+@AgentKey = docs-writer
+@AgentId = 00000000-0000-0000-0000-000000000000
 
-GET {{IdeaForge.WebApi_HostAddress}}/weatherforecast/
+### List agents
+GET {{IdeaForge.WebApi_HostAddress}}/api/agents
 Accept: application/json
 
-###
+### Create agent
+POST {{IdeaForge.WebApi_HostAddress}}/api/agents
+Content-Type: application/json
+
+{
+  "key": "{{AgentKey}}",
+  "name": "Docs Writer",
+  "role": "Documentation Agent",
+  "description": "Writes and maintains project documentation.",
+  "mission": "Keep ideaForge documentation accurate and useful.",
+  "specialties": ["documentation", "api", "developer-experience"],
+  "metadata": {
+    "team": "platform"
+  },
+  "provider": 2,
+  "model": "gpt-5.4",
+  "systemPrompt": "Answer in concise Traditional Chinese."
+}
+
+### Get agent by key
+GET {{IdeaForge.WebApi_HostAddress}}/api/agents/by-key/{{AgentKey}}
+Accept: application/json
+
+### Chat with agent by key
+POST {{IdeaForge.WebApi_HostAddress}}/api/agents/by-key/{{AgentKey}}/chat
+Content-Type: application/json
+
+{
+  "prompt": "Reply with exactly DOCS_AGENT_OK.",
+  "workingDirectory": "D:\\projects\\IdeaForge",
+  "additionalDirectories": []
+}
+
+### Report execution by key
+POST {{IdeaForge.WebApi_HostAddress}}/api/agents/by-key/{{AgentKey}}/executions
+Content-Type: application/json
+
+{
+  "provider": 2,
+  "model": "gpt-5.4",
+  "sessionId": "sample-session-id",
+  "prompt": "Summarize this repository.",
+  "outputSummary": "Repository summarized successfully.",
+  "success": true,
+  "errorMessage": null,
+  "startedAtUtc": "2026-04-27T02:00:00Z",
+  "completedAtUtc": "2026-04-27T02:01:00Z"
+}
+
+### List executions by key
+GET {{IdeaForge.WebApi_HostAddress}}/api/agents/by-key/{{AgentKey}}/executions
+Accept: application/json
+
+### Update agent by id
+PUT {{IdeaForge.WebApi_HostAddress}}/api/agents/{{AgentId}}
+Content-Type: application/json
+
+{
+  "name": "Docs Writer",
+  "role": "Documentation Agent",
+  "description": "Writes and maintains project documentation.",
+  "mission": "Keep ideaForge documentation accurate and useful.",
+  "status": 1,
+  "specialties": ["documentation", "api", "developer-experience"],
+  "metadata": {
+    "team": "platform"
+  },
+  "provider": 2,
+  "model": "gpt-5.4",
+  "systemPrompt": "Answer in concise Traditional Chinese."
+}
