@@ -97,6 +97,13 @@ Copilot example:
   -AgentApiBaseUrl "http://localhost:5246"
 ```
 
+POC permission defaults:
+
+- Copilot wrapper defaults to `--allow-all-tools`, `--allow-all-urls`, and `--allow-all-paths`.
+- Copilot SDK provider defaults to approving every permission request.
+- Codex wrapper and C# provider default to `--dangerously-bypass-approvals-and-sandbox`; when that bypass is disabled, Codex falls back to `danger-full-access`.
+- These defaults are intentionally broad for the company POC and should be tightened before production use.
+
 Session behavior:
 
 - Copilot JSON output includes `sessionId`; the wrapper can capture and report it automatically.

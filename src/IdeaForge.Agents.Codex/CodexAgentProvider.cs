@@ -81,7 +81,15 @@ public sealed class CodexAgentProvider : IAgentProvider
         var arguments = new StringBuilder();
 
         arguments.Append("exec ");
-        arguments.Append("--sandbox ").Append(Escape(_options.Sandbox)).Append(' ');
+
+        if (_options.DangerouslyBypassApprovalsAndSandbox)
+        {
+            arguments.Append("--dangerously-bypass-approvals-and-sandbox ");
+        }
+        else
+        {
+            arguments.Append("--sandbox ").Append(Escape(_options.Sandbox)).Append(' ');
+        }
 
         if (_options.SkipGitRepoCheck)
         {

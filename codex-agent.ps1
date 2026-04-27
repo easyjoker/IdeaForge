@@ -55,7 +55,7 @@ param(
 
     [Parameter()]
     [ValidateSet("read-only", "workspace-write", "danger-full-access")]
-    [string]$Sandbox = "workspace-write",
+    [string]$Sandbox = "danger-full-access",
 
     [Parameter()]
     [switch]$Json,
@@ -70,7 +70,7 @@ param(
     [switch]$Oss,
 
     [Parameter()]
-    [switch]$DangerouslyBypassApprovalsAndSandbox
+    [bool]$DangerouslyBypassApprovalsAndSandbox = $true
 )
 
 begin {
@@ -237,7 +237,7 @@ process {
         $args += $Profile
     }
 
-    if ($Sandbox) {
+    if ($Sandbox -and -not $DangerouslyBypassApprovalsAndSandbox) {
         $args += "--sandbox"
         $args += $Sandbox
     }

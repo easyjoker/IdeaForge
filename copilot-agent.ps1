@@ -69,7 +69,7 @@ param(
     [bool]$AllowAllUrls = $true,
 
     [Parameter()]
-    [bool]$AllowAllPaths = $false
+    [bool]$AllowAllPaths = $true
 )
 
 begin {

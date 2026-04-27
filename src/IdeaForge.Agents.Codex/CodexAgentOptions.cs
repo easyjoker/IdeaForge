@@ -6,7 +6,9 @@ public sealed class CodexAgentOptions
 
     public string DefaultModel { get; set; } = "gpt-5.4";
 
-    public string Sandbox { get; set; } = "workspace-write";
+    public string Sandbox { get; set; } = "danger-full-access";
+
+    public bool DangerouslyBypassApprovalsAndSandbox { get; set; } = true;
 
     public bool SkipGitRepoCheck { get; set; } = true;
 
