@@ -1,7 +1,7 @@
 namespace IdeaForge.Application.ClientProjects;
 
 /// <summary>
-/// Lifecycle status for client companies, projects, and repositories.
+/// Lifecycle status for client companies, client systems/projects, and repositories.
 /// </summary>
 public enum ClientResourceStatus
 {
@@ -129,32 +129,33 @@ public sealed class ClientCompanyDto
 }
 
 /// <summary>
-/// Client project returned by the project settings API.
+/// Client-owned system or application returned by the project settings API.
+/// In the API contract this is called a client project.
 /// </summary>
 public sealed class ClientProjectDto
 {
     /// <summary>
-    /// Unique client project identifier.
+    /// Unique client system/project identifier.
     /// </summary>
     public required Guid Id { get; init; }
 
     /// <summary>
-    /// Client company that owns this project.
+    /// Client company that owns this system/project.
     /// </summary>
     public required Guid ClientCompanyId { get; init; }
 
     /// <summary>
-    /// Stable project key scoped to the owning company.
+    /// Stable system/project key scoped to the owning company.
     /// </summary>
     public required string Key { get; init; }
 
     /// <summary>
-    /// Display name of the client project.
+    /// Display name of the client-owned system or application.
     /// </summary>
     public required string Name { get; init; }
 
     /// <summary>
-    /// Optional short description of the project goal or scope.
+    /// Optional short description of the system, application, or product scope.
     /// </summary>
     public string? Description { get; init; }
 
@@ -164,18 +165,18 @@ public sealed class ClientProjectDto
     public ClientResourceStatus Status { get; init; }
 
     /// <summary>
-    /// UTC timestamp when this project was created.
+    /// UTC timestamp when this system/project was created.
     /// </summary>
     public DateTimeOffset CreatedAtUtc { get; init; }
 
     /// <summary>
-    /// UTC timestamp when this project was last updated.
+    /// UTC timestamp when this system/project was last updated.
     /// </summary>
     public DateTimeOffset UpdatedAtUtc { get; init; }
 }
 
 /// <summary>
-/// Repository or service configuration returned by the project settings API.
+/// Repository configuration returned by the project settings API.
 /// </summary>
 public sealed class ProjectRepositoryDto
 {
@@ -185,17 +186,17 @@ public sealed class ProjectRepositoryDto
     public required Guid Id { get; init; }
 
     /// <summary>
-    /// Client project that owns this repository.
+    /// Client system/project that owns this repository.
     /// </summary>
     public required Guid ClientProjectId { get; init; }
 
     /// <summary>
-    /// Stable repository key scoped to the owning project.
+    /// Stable repository key scoped to the owning system/project.
     /// </summary>
     public required string Key { get; init; }
 
     /// <summary>
-    /// Display name of the repository or service.
+    /// Display name of the repository.
     /// </summary>
     public required string Name { get; init; }
 
@@ -215,7 +216,7 @@ public sealed class ProjectRepositoryDto
     public required string GitStrategySkillPath { get; init; }
 
     /// <summary>
-    /// Optional short description of the service or repository.
+    /// Optional short description of the repository and its role in the system.
     /// </summary>
     public string? Description { get; init; }
 
@@ -278,38 +279,39 @@ public sealed class UpdateClientCompanyRequest
 }
 
 /// <summary>
-/// Request used to create a client project under a company.
+/// Request used to create a client-owned system/application under a company.
+/// In the API contract this is called a client project.
 /// </summary>
 public sealed class CreateClientProjectRequest
 {
     /// <summary>
-    /// Stable project key scoped to the owning company, for example <c>commerce-platform</c>.
+    /// Stable system/project key scoped to the owning company, for example <c>commerce-platform</c>.
     /// </summary>
     public required string Key { get; init; }
 
     /// <summary>
-    /// Display name of the client project.
+    /// Display name of the client-owned system or application.
     /// </summary>
     public required string Name { get; init; }
 
     /// <summary>
-    /// Optional short description of the project goal or scope.
+    /// Optional short description of the system, application, or product scope.
     /// </summary>
     public string? Description { get; init; }
 }
 
 /// <summary>
-/// Request used to update a client project.
+/// Request used to update a client-owned system/application.
 /// </summary>
 public sealed class UpdateClientProjectRequest
 {
     /// <summary>
-    /// Display name of the client project.
+    /// Display name of the client-owned system or application.
     /// </summary>
     public required string Name { get; init; }
 
     /// <summary>
-    /// Optional short description of the project goal or scope.
+    /// Optional short description of the system, application, or product scope.
     /// </summary>
     public string? Description { get; init; }
 
@@ -320,17 +322,17 @@ public sealed class UpdateClientProjectRequest
 }
 
 /// <summary>
-/// Request used to create a repository or service under a client project.
+/// Request used to create a source repository under a client system/project.
 /// </summary>
 public sealed class CreateProjectRepositoryRequest
 {
     /// <summary>
-    /// Stable repository key scoped to the owning project, for example <c>order-service</c>.
+    /// Stable repository key scoped to the owning system/project, for example <c>order-service</c>.
     /// </summary>
     public required string Key { get; init; }
 
     /// <summary>
-    /// Display name of the repository or service.
+    /// Display name of the repository.
     /// </summary>
     public required string Name { get; init; }
 
@@ -350,18 +352,18 @@ public sealed class CreateProjectRepositoryRequest
     public required string GitStrategySkillPath { get; init; }
 
     /// <summary>
-    /// Optional short description of the service or repository.
+    /// Optional short description of the repository and its role in the system.
     /// </summary>
     public string? Description { get; init; }
 }
 
 /// <summary>
-/// Request used to update a repository or service.
+/// Request used to update a source repository.
 /// </summary>
 public sealed class UpdateProjectRepositoryRequest
 {
     /// <summary>
-    /// Display name of the repository or service.
+    /// Display name of the repository.
     /// </summary>
     public required string Name { get; init; }
 
@@ -381,7 +383,7 @@ public sealed class UpdateProjectRepositoryRequest
     public required string GitStrategySkillPath { get; init; }
 
     /// <summary>
-    /// Optional short description of the service or repository.
+    /// Optional short description of the repository and its role in the system.
     /// </summary>
     public string? Description { get; init; }
 

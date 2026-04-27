@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IdeaForge.WebApi.Controllers;
 
 /// <summary>
-/// Manage repository or service settings used by agents.
+/// Manage repository settings used by agents.
 /// </summary>
 [ApiController]
 [Route("api/project-repositories")]
@@ -18,7 +18,7 @@ public sealed class ProjectRepositoriesController : ControllerBase
     }
 
     /// <summary>
-    /// Get a project repository by identifier.
+    /// Get a repository under a client system/project by identifier.
     /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<ProjectRepositoryDto>(StatusCodes.Status200OK)]
@@ -30,7 +30,7 @@ public sealed class ProjectRepositoriesController : ControllerBase
     }
 
     /// <summary>
-    /// Update a project repository or service.
+    /// Update a repository under a client system/project.
     /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType<ProjectRepositoryDto>(StatusCodes.Status200OK)]
@@ -49,11 +49,11 @@ public sealed class ProjectRepositoriesController : ControllerBase
         }
         catch (ArgumentException exception)
         {
-            return BadRequest(CreateProblem("Invalid project repository request", exception, StatusCodes.Status400BadRequest));
+            return BadRequest(CreateProblem("Invalid system repository request", exception, StatusCodes.Status400BadRequest));
         }
         catch (InvalidOperationException exception)
         {
-            return Conflict(CreateProblem("Project repository conflict", exception, StatusCodes.Status409Conflict));
+            return Conflict(CreateProblem("System repository conflict", exception, StatusCodes.Status409Conflict));
         }
     }
 

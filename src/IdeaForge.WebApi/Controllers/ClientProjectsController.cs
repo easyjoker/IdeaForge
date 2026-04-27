@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IdeaForge.WebApi.Controllers;
 
 /// <summary>
-/// Manage client projects and the repositories owned by those projects.
+/// Manage client-owned systems/projects and the repositories owned by those systems.
 /// </summary>
 [ApiController]
 [Route("api/client-projects")]
@@ -18,7 +18,7 @@ public sealed class ClientProjectsController : ControllerBase
     }
 
     /// <summary>
-    /// Get a client project by identifier.
+    /// Get a client-owned system/project by identifier.
     /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<ClientProjectDto>(StatusCodes.Status200OK)]
@@ -30,7 +30,7 @@ public sealed class ClientProjectsController : ControllerBase
     }
 
     /// <summary>
-    /// Update a client project.
+    /// Update a client-owned system/project.
     /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType<ClientProjectDto>(StatusCodes.Status200OK)]
@@ -48,12 +48,12 @@ public sealed class ClientProjectsController : ControllerBase
         }
         catch (ArgumentException exception)
         {
-            return BadRequest(CreateProblem("Invalid client project request", exception, StatusCodes.Status400BadRequest));
+            return BadRequest(CreateProblem("Invalid client system/project request", exception, StatusCodes.Status400BadRequest));
         }
     }
 
     /// <summary>
-    /// List repositories under a client project.
+    /// List repositories under a client-owned system/project.
     /// </summary>
     [HttpGet("{projectId:guid}/repositories")]
     [ProducesResponseType<IReadOnlyList<ProjectRepositoryDto>>(StatusCodes.Status200OK)]
@@ -74,7 +74,7 @@ public sealed class ClientProjectsController : ControllerBase
     }
 
     /// <summary>
-    /// Create a repository or service under a client project.
+    /// Create a source repository under a client-owned system/project.
     /// </summary>
     [HttpPost("{projectId:guid}/repositories")]
     [ProducesResponseType<ProjectRepositoryDto>(StatusCodes.Status201Created)]
@@ -93,7 +93,7 @@ public sealed class ClientProjectsController : ControllerBase
         }
         catch (ArgumentException exception)
         {
-            return BadRequest(CreateProblem("Invalid project repository request", exception, StatusCodes.Status400BadRequest));
+            return BadRequest(CreateProblem("Invalid system repository request", exception, StatusCodes.Status400BadRequest));
         }
         catch (KeyNotFoundException)
         {
@@ -101,7 +101,7 @@ public sealed class ClientProjectsController : ControllerBase
         }
         catch (InvalidOperationException exception)
         {
-            return Conflict(CreateProblem("Project repository conflict", exception, StatusCodes.Status409Conflict));
+            return Conflict(CreateProblem("System repository conflict", exception, StatusCodes.Status409Conflict));
         }
     }
 

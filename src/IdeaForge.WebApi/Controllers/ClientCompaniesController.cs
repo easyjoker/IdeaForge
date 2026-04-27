@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IdeaForge.WebApi.Controllers;
 
 /// <summary>
-/// Manage client companies and the projects owned by those companies.
+/// Manage client companies and the systems/projects owned by those companies.
 /// </summary>
 [ApiController]
 [Route("api/client-companies")]
@@ -102,7 +102,7 @@ public sealed class ClientCompaniesController : ControllerBase
     }
 
     /// <summary>
-    /// List projects under a client company.
+    /// List client-owned systems/projects under a client company.
     /// </summary>
     [HttpGet("{companyId:guid}/projects")]
     [ProducesResponseType<IReadOnlyList<ClientProjectDto>>(StatusCodes.Status200OK)]
@@ -123,7 +123,7 @@ public sealed class ClientCompaniesController : ControllerBase
     }
 
     /// <summary>
-    /// Create a project under a client company.
+    /// Create a client-owned system/project under a client company.
     /// </summary>
     [HttpPost("{companyId:guid}/projects")]
     [ProducesResponseType<ClientProjectDto>(StatusCodes.Status201Created)]
@@ -142,7 +142,7 @@ public sealed class ClientCompaniesController : ControllerBase
         }
         catch (ArgumentException exception)
         {
-            return BadRequest(CreateProblem("Invalid client project request", exception, StatusCodes.Status400BadRequest));
+            return BadRequest(CreateProblem("Invalid client system/project request", exception, StatusCodes.Status400BadRequest));
         }
         catch (KeyNotFoundException)
         {
@@ -150,7 +150,7 @@ public sealed class ClientCompaniesController : ControllerBase
         }
         catch (InvalidOperationException exception)
         {
-            return Conflict(CreateProblem("Client project conflict", exception, StatusCodes.Status409Conflict));
+            return Conflict(CreateProblem("Client system/project conflict", exception, StatusCodes.Status409Conflict));
         }
     }
 

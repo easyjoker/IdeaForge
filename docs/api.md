@@ -238,7 +238,15 @@ Client resource status values:
 - `2` = `Disabled`
 - `3` = `Archived`
 
-## Create Client Project
+## Client Project Meaning
+
+In ideaForge, a client project represents a system, product, or application owned by a client company. Keep using the `/client-projects` API routes, but treat the hierarchy as:
+
+```text
+client_company 1:N client_project(system) 1:N project_repository
+```
+
+## Create Client Project (System)
 
 Endpoint:
 
@@ -252,11 +260,11 @@ Example body:
 {
   "key": "commerce-platform",
   "name": "Commerce Platform",
-  "description": "Customer-facing commerce modernization project."
+  "description": "Customer-facing commerce system."
 }
 ```
 
-## List Client Projects
+## List Client Projects (Systems)
 
 Endpoint:
 
@@ -264,7 +272,7 @@ Endpoint:
 GET /api/client-companies/{companyId}/projects
 ```
 
-## Update Client Project
+## Update Client Project (System)
 
 Endpoint:
 
@@ -277,12 +285,14 @@ Example body:
 ```json
 {
   "name": "Commerce Platform",
-  "description": "Customer-facing commerce modernization project.",
+  "description": "Customer-facing commerce system.",
   "status": 1
 }
 ```
 
 ## Create Project Repository
+
+Repositories are scoped to one client project/system. Use this for each source repository in the selected system, such as a microservice repository, frontend repository, or shared library repository.
 
 Endpoint:
 

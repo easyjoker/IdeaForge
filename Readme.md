@@ -90,6 +90,12 @@ ideaForge separates an agent into three concerns:
 
 This lets an employee behave like a dedicated specialist while still allowing runtime state to evolve after real executions.
 
+Client delivery settings use this hierarchy:
+
+- `client_company`: the external customer company
+- `client_project`: one client-owned system, product, or application under that company
+- `project_repository`: one source repository under that client project/system; each system can have many repositories
+
 ## Main API Flow
 
 1. Create an employee-style agent with `POST /api/agents`.

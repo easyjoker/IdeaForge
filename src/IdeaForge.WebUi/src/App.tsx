@@ -166,7 +166,7 @@ function Shell() {
             <Text className="eyebrow">POC workspace</Text>
             <Title className="hero-title">把 Swagger 操作收斂成用戶能直接使用的工作台</Title>
             <Paragraph className="hero-copy">
-              管理員工型 agent、客戶公司、專案與 repository 設定，讓下一步任務指派可以落在明確的服務範圍。
+              管理員工型 agent、客戶公司、客戶系統與 repository 設定，讓下一步任務指派可以落在明確的服務範圍。
             </Paragraph>
           </div>
           <Card className="api-card">
@@ -206,7 +206,7 @@ function Shell() {
               label: (
                 <Space>
                   <ApartmentOutlined />
-                  Client Projects
+                  Client Systems
                 </Space>
               ),
               children: <ClientProjectsPanel messageApi={messageApi} />
@@ -577,14 +577,14 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
           description: emptyToUndefined(values.description),
           status: values.status ?? ClientResourceStatus.Active
         });
-        messageApi.success("Project updated");
+        messageApi.success("System updated");
       } else {
         await api.createProject(selectedCompany.id, {
           key: values.key ?? "",
           name: values.name,
           description: emptyToUndefined(values.description)
         });
-        messageApi.success("Project created");
+        messageApi.success("System created");
       }
 
       setProjectOpen(false);
@@ -596,7 +596,7 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
 
   async function saveRepository(values: RepositoryFormValues) {
     if (!selectedProject) {
-      messageApi.warning("Select a project first");
+      messageApi.warning("Select a system first");
       return;
     }
 
@@ -667,7 +667,7 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
         </Col>
         <Col xs={24} md={8}>
           <Card className="metric-card">
-            <Statistic title="Projects In Focus" value={projects.length} />
+            <Statistic title="Systems In Focus" value={projects.length} />
           </Card>
         </Col>
         <Col xs={24} md={8}>
@@ -732,8 +732,8 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
 
         <Col xs={24} xl={8}>
           <WorkspaceCard
-            title="Client Projects"
-            actionLabel="New Project"
+            title="Client Systems"
+            actionLabel="New System"
             disabled={!selectedCompany}
             onCreate={() => openProjectForm()}
             onRefresh={() => selectedCompany && loadProjects(selectedCompany.id)}
@@ -743,11 +743,11 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
               dataSource={projects}
               pagination={false}
               size="small"
-              locale={{ emptyText: selectedCompany ? <Empty description="No projects yet" /> : <Empty description="Select a company first" /> }}
+              locale={{ emptyText: selectedCompany ? <Empty description="No systems yet" /> : <Empty description="Select a company first" /> }}
               rowClassName={(record) => (record.id === selectedProject?.id ? "selected-row" : "")}
               columns={[
                 {
-                  title: "Project",
+                  title: "System",
                   render: (_, record) => (
                     <Space direction="vertical" size={0}>
                       <Text strong>{record.name}</Text>
@@ -786,7 +786,7 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
 
         <Col xs={24} xl={8}>
           <WorkspaceCard
-            title="Project Repositories"
+            title="System Repositories"
             actionLabel="New Repository"
             disabled={!selectedProject}
             onCreate={() => openRepositoryForm()}
@@ -797,7 +797,7 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
               dataSource={repositories}
               pagination={false}
               size="small"
-              locale={{ emptyText: selectedProject ? <Empty description="No repositories yet" /> : <Empty description="Select a project first" /> }}
+              locale={{ emptyText: selectedProject ? <Empty description="No repositories yet" /> : <Empty description="Select a system first" /> }}
               columns={[
                 {
                   title: "Repository",
@@ -863,14 +863,19 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
         </Form>
       </Modal>
 
-      <Modal title={editingProject ? "Update project" : "Create project"} open={projectOpen} onCancel={() => setProjectOpen(false)} footer={null} destroyOnHidden>
+      <Modal title={editingProject ? "Update system" : "Create system"} open={projectOpen} onCancel={() => setProjectOpen(false)} footer={null} destroyOnHidden>
         <Form form={projectForm} layout="vertical" onFinish={saveProject}>
           {!editingProject && (
-            <Form.Item name="key" label="Key" rules={[{ required: true, message: "Project key is required" }]}>
+            <Form.Item
+              name="key"
+              label="System Key"
+              extra="A system is a client-owned application or product under the selected company."
+              rules={[{ required: true, message: "System key is required" }]}
+            >
               <Input placeholder="commerce-platform" />
             </Form.Item>
           )}
-          <Form.Item name="name" label="Name" rules={[{ required: true, message: "Project name is required" }]}>
+          <Form.Item name="name" label="System Name" rules={[{ required: true, message: "System name is required" }]}>
             <Input placeholder="Commerce Platform" />
           </Form.Item>
           {editingProject && <StatusField />}
@@ -878,7 +883,7 @@ function ClientProjectsPanel({ messageApi }: { messageApi: ReturnType<typeof mes
             <Input.TextArea rows={3} />
           </Form.Item>
           <Button type="primary" htmlType="submit" block>
-            {editingProject ? "Update Project" : "Create Project"}
+            {editingProject ? "Update System" : "Create System"}
           </Button>
         </Form>
       </Modal>

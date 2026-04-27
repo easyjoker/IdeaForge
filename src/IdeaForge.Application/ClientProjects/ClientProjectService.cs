@@ -103,7 +103,7 @@ public sealed class ClientProjectService : IClientProjectService
         var existing = await _repository.GetProjectByCompanyAndKeyAsync(companyId, key, cancellationToken);
         if (existing is not null)
         {
-            throw new InvalidOperationException($"Client project key '{key}' already exists for company '{companyId}'.");
+            throw new InvalidOperationException($"Client system/project key '{key}' already exists for company '{companyId}'.");
         }
 
         var now = DateTimeOffset.UtcNow;
@@ -145,7 +145,7 @@ public sealed class ClientProjectService : IClientProjectService
         var project = await _repository.GetProjectByIdAsync(projectId, cancellationToken);
         if (project is null)
         {
-            throw new KeyNotFoundException($"Client project '{projectId}' was not found.");
+            throw new KeyNotFoundException($"Client system/project '{projectId}' was not found.");
         }
 
         var repositories = await _repository.ListRepositoriesAsync(projectId, cancellationToken);
@@ -165,7 +165,7 @@ public sealed class ClientProjectService : IClientProjectService
         var project = await _repository.GetProjectByIdAsync(projectId, cancellationToken);
         if (project is null)
         {
-            throw new KeyNotFoundException($"Client project '{projectId}' was not found.");
+            throw new KeyNotFoundException($"Client system/project '{projectId}' was not found.");
         }
 
         var key = RequireText(request.Key, nameof(request.Key));
@@ -221,7 +221,7 @@ public sealed class ClientProjectService : IClientProjectService
         var existing = await _repository.GetRepositoryByProjectAndKeyAsync(projectId, key, cancellationToken);
         if (existing is not null && existing.Id != currentRepositoryId)
         {
-            throw new InvalidOperationException($"Project repository key '{key}' already exists for project '{projectId}'.");
+            throw new InvalidOperationException($"Repository key '{key}' already exists for system/project '{projectId}'.");
         }
     }
 

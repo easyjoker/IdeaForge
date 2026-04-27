@@ -127,7 +127,7 @@ Stores client company identity:
 
 `client_project`
 
-Stores a business project owned by a client company:
+Stores a client-owned system or application under a client company. The API contract keeps the `project` name, but the domain meaning is a system/product that the client company owns:
 
 - client company reference
 - key
@@ -137,9 +137,9 @@ Stores a business project owned by a client company:
 
 `project_repository`
 
-Stores the repository or service that agents operate on:
+Stores one source repository that belongs to a client system/project. A single client project can have many repositories:
 
-- client project reference
+- client project/system reference
 - key
 - name
 - remote repository URL
