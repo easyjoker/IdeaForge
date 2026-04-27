@@ -70,6 +70,35 @@ Swagger:
 http://localhost:5246/swagger
 ```
 
+## Docker Compose
+
+Start the Web API container:
+
+```powershell
+docker compose up --build
+```
+
+The compose stack uses:
+
+- `webapi`: ASP.NET Core Web API built from `Dockerfile`.
+- `ConnectionStrings__IdeaForgeDb`: points the Web API container to the host PostgreSQL server through `host.docker.internal:5432`.
+
+This means Docker Compose uses the same local PostgreSQL instance as normal development. The database name can still be isolated with `IDEA_FORGE_DB_NAME`.
+
+Default Docker URL:
+
+```text
+http://localhost:5246/swagger
+```
+
+Copy `.env.example` to `.env` to override the API port, database name, host, user, or password. The `.env` file is intentionally ignored by git.
+
+Stop the stack:
+
+```powershell
+docker compose down
+```
+
 ## Common Verification
 
 Build the solution:

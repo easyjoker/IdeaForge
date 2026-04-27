@@ -54,6 +54,18 @@ Open Swagger:
 http://localhost:5246/swagger
 ```
 
+Run with Docker Compose:
+
+```powershell
+docker compose up --build
+```
+
+Docker Compose starts the Web API and connects it to the host PostgreSQL server on `localhost:5432` through `host.docker.internal`. The API is available at:
+
+```text
+http://localhost:5246/swagger
+```
+
 ## Core Model
 
 ideaForge separates an agent into three concerns:

@@ -14,6 +14,9 @@ Thumbs.db
 *.log
 *.tmp
 *.bak
+.env
+.env.*
+!.env.example
 
 # .NET build outputs
 bin/
