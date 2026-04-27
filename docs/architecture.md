@@ -116,6 +116,38 @@ Stores execution history:
 - error message
 - started and completed timestamps
 
+`client_company`
+
+Stores client company identity:
+
+- key
+- name
+- description
+- lifecycle status
+
+`client_project`
+
+Stores a business project owned by a client company:
+
+- client company reference
+- key
+- name
+- description
+- lifecycle status
+
+`project_repository`
+
+Stores the repository or service that agents operate on:
+
+- client project reference
+- key
+- name
+- remote repository URL
+- local workspace path
+- git strategy skill path
+- description
+- lifecycle status
+
 ## Provider Values
 
 `AgentProviderKind` values:

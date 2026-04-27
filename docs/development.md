@@ -29,7 +29,7 @@ The startup initializer will:
 
 - create the configured database when it does not exist
 - execute `db/postgresql/001_agents.sql`
-- create `employees`, `agent_data`, and `agent_executions`
+- create `employees`, `agent_data`, `agent_executions`, `client_company`, `client_project`, and `project_repository`
 
 For non-local environments, move credentials to user secrets, environment variables, or a secret manager.
 
