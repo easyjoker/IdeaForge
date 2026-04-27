@@ -55,7 +55,7 @@ public sealed class EmployeesController : ControllerBase
         try
         {
             var created = await _service.CreateEmployeeAsync(request, cancellationToken);
-            return CreatedAtAction(nameof(GetAsync), new { id = created.Id }, created);
+            return Created($"/api/employees/{created.Id}", created);
         }
         catch (ArgumentException exception)
         {

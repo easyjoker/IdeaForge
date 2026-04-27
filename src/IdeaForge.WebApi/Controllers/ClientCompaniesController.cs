@@ -66,7 +66,7 @@ public sealed class ClientCompaniesController : ControllerBase
         try
         {
             var created = await _service.CreateCompanyAsync(request, cancellationToken);
-            return CreatedAtAction(nameof(GetAsync), new { id = created.Id }, created);
+            return Created($"/api/client-companies/{created.Id}", created);
         }
         catch (ArgumentException exception)
         {

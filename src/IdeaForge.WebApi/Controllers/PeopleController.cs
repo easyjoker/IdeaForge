@@ -53,7 +53,7 @@ public sealed class PeopleController : ControllerBase
         try
         {
             var created = await _service.CreatePersonAsync(request, cancellationToken);
-            return CreatedAtAction(nameof(GetAsync), new { id = created.Id }, created);
+            return Created($"/api/people/{created.Id}", created);
         }
         catch (ArgumentException exception)
         {
