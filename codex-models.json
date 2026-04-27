@@ -1,0 +1,87 @@
+{
+  "provider": "codex",
+  "generatedAt": "2026-04-27",
+  "purpose": "Local registry for OpenAI Codex model validation and UX hints.",
+  "notes": [
+    "Use this file as a cache, not as the sole source of truth.",
+    "OpenAI model availability can vary by account, rollout, and release timing.",
+    "The model IDs below are CLI-friendly IDs that can be passed to Codex with --model.",
+    "The project default remains gpt-5.4 unless a caller explicitly passes another model."
+  ],
+  "sources": [
+    {
+      "url": "https://developers.openai.com/api/docs/models",
+      "description": "OpenAI model guide"
+    },
+    {
+      "url": "https://developers.openai.com/codex/cli/reference",
+      "description": "OpenAI Codex CLI reference"
+    }
+  ],
+  "models": [
+    {
+      "id": "gpt-5.5",
+      "displayName": "GPT-5.5",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true,
+      "recommendedFor": "Complex reasoning and coding"
+    },
+    {
+      "id": "gpt-5.4",
+      "displayName": "GPT-5.4",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true,
+      "recommendedFor": "Default project coding model"
+    },
+    {
+      "id": "gpt-5.4-mini",
+      "displayName": "GPT-5.4 mini",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true,
+      "recommendedFor": "Lower-latency and lower-cost coding tasks"
+    },
+    {
+      "id": "gpt-5.4-nano",
+      "displayName": "GPT-5.4 nano",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true,
+      "recommendedFor": "Small and cost-sensitive tasks"
+    },
+    {
+      "id": "gpt-5.3-codex",
+      "displayName": "GPT-5.3-Codex",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true,
+      "recommendedFor": "Agentic coding tasks"
+    },
+    {
+      "id": "gpt-5.2-codex",
+      "displayName": "GPT-5.2-Codex",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true,
+      "recommendedFor": "Agentic coding tasks"
+    },
+    {
+      "id": "gpt-5.1-codex",
+      "displayName": "GPT-5.1-Codex",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true,
+      "recommendedFor": "Agentic coding tasks"
+    },
+    {
+      "id": "gpt-5-codex",
+      "displayName": "GPT-5-Codex",
+      "provider": "OpenAI",
+      "releaseStatus": "GA",
+      "supportsCli": true,
+      "recommendedFor": "Agentic coding tasks"
+    }
+  ]
+}

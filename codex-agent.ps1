@@ -8,6 +8,9 @@ param(
     [string]$Model = "gpt-5.4",
 
     [Parameter()]
+    [string]$ModelRegistryPath,
+
+    [Parameter()]
     [string]$Profile,
 
     [Parameter()]
@@ -171,6 +174,26 @@ process {
     $codexCommand = Get-Command codex -ErrorAction SilentlyContinue
     if (-not $codexCommand) {
         throw "The 'codex' command was not found in PATH."
+    }
+
+    if ($Model) {
+        $resolvedModelRegistryPath = $ModelRegistryPath
+        if (-not $resolvedModelRegistryPath) {
+            $resolvedModelRegistryPath = Join-Path -Path $PSScriptRoot -ChildPath "codex-models.json"
+        }
+
+        $resolvedModelRegistryPath = [System.IO.Path]::GetFullPath($resolvedModelRegistryPath)
+
+        if (-not (Test-Path -LiteralPath $resolvedModelRegistryPath)) {
+            throw "Codex model registry not found: $resolvedModelRegistryPath"
+        }
+
+        $modelRegistry = Get-Content -LiteralPath $resolvedModelRegistryPath -Raw | ConvertFrom-Json
+        $allowedModels = @($modelRegistry.models | ForEach-Object { $_.id })
+
+        if ($allowedModels -notcontains $Model) {
+            throw "Model '$Model' was not found in the Codex model registry: $resolvedModelRegistryPath"
+        }
     }
 
     $args = @()

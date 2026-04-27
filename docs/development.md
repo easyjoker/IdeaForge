@@ -156,6 +156,12 @@ Official references:
 
 - [GitHub Copilot CLI programmatic reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference)
 - [OpenAI Codex CLI reference](https://developers.openai.com/codex/cli/reference)
+- [OpenAI model guide](https://developers.openai.com/api/docs/models)
+
+Local model registries:
+
+- `codex-models.json`: Codex model validation cache, including `gpt-5.5`.
+- `copilot-models.json`: Copilot model validation cache.
 
 Codex example:
 

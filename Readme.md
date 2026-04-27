@@ -131,6 +131,11 @@ Run Copilot and report execution back to the API:
 
 Both wrappers default to `gpt-5.4`.
 
+Model registries:
+
+- `codex-models.json` caches Codex model IDs, including `gpt-5.5`.
+- `copilot-models.json` caches GitHub Copilot model IDs.
+
 ## Notes
 
 - Swagger includes XML comments and enum descriptions for API discoverability.
