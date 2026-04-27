@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task Start Commit Policy"
+  short_description: "Commit changes after validated edits"
+  default_prompt: "Read this repository skill before work and commit validated modifications."
