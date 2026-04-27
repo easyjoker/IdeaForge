@@ -3,7 +3,7 @@ using IdeaForge.Agents.Abstractions;
 namespace IdeaForge.Application.Agents;
 
 /// <summary>
-/// Request used to create an employee-backed agent profile.
+/// Request used to create an AI person, employee record, and agent settings.
 /// </summary>
 public sealed class CreateAgentProfileRequest
 {
@@ -13,9 +13,19 @@ public sealed class CreateAgentProfileRequest
     public required string Key { get; init; }
 
     /// <summary>
-    /// Display name of the employee-style agent.
+    /// Display name of the AI person, for example <c>Docs Writer</c>.
     /// </summary>
-    public required string Name { get; init; }
+    public string? DisplayName { get; init; }
+
+    /// <summary>
+    /// Backward-compatible alias for <see cref="DisplayName"/>.
+    /// </summary>
+    public string? Name { get; init; }
+
+    /// <summary>
+    /// Optional person profile description.
+    /// </summary>
+    public string? PersonDescription { get; init; }
 
     /// <summary>
     /// Functional role of the employee, for example <c>Code Reviewer</c>.
@@ -23,7 +33,7 @@ public sealed class CreateAgentProfileRequest
     public string? Role { get; init; }
 
     /// <summary>
-    /// Short description of what this employee does.
+    /// Backward-compatible alias for <see cref="PersonDescription"/>.
     /// </summary>
     public string? Description { get; init; }
 
@@ -38,7 +48,12 @@ public sealed class CreateAgentProfileRequest
     public IReadOnlyList<string> Specialties { get; init; } = Array.Empty<string>();
 
     /// <summary>
-    /// Free-form metadata such as team, owner, or environment tags.
+    /// Free-form person metadata such as avatar, locale, or contact tags.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> PersonMetadata { get; init; } = new Dictionary<string, string>();
+
+    /// <summary>
+    /// Free-form employee metadata such as team, owner, or environment tags.
     /// </summary>
     public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
 

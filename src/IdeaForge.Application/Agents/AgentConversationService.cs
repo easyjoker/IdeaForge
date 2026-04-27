@@ -114,7 +114,9 @@ public sealed class AgentConversationService : IAgentConversationService
         {
             EmployeeId = profile.Employee.Id,
             EmployeeKey = profile.Employee.Key,
-            EmployeeName = profile.Employee.Name,
+            PersonId = profile.Person.Id,
+            PersonDisplayName = profile.Person.DisplayName,
+            EmployeeName = profile.Person.DisplayName,
             Provider = result.Provider,
             Model = profile.AgentData.Model,
             SessionId = profile.AgentData.SessionId,

@@ -1,16 +1,31 @@
 namespace IdeaForge.Infrastructure.Persistence;
 
+public sealed class PersonEntity
+{
+    public Guid Id { get; set; }
+
+    public short Kind { get; set; } = 1;
+
+    public string DisplayName { get; set; } = string.Empty;
+
+    public string? Description { get; set; }
+
+    public string MetadataJson { get; set; } = "{}";
+
+    public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
 public sealed class EmployeeEntity
 {
     public Guid Id { get; set; }
 
+    public Guid PersonId { get; set; }
+
     public string Key { get; set; } = string.Empty;
 
-    public string Name { get; set; } = string.Empty;
-
     public string? Role { get; set; }
-
-    public string? Description { get; set; }
 
     public string? Mission { get; set; }
 

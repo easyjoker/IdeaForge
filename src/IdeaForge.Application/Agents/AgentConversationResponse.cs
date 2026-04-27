@@ -3,7 +3,7 @@ using IdeaForge.Agents.Abstractions;
 namespace IdeaForge.Application.Agents;
 
 /// <summary>
-/// Result returned after sending a prompt to a specific employee-style agent.
+/// Result returned after sending a prompt to a specific AI employee agent.
 /// </summary>
 public sealed class AgentConversationResponse
 {
@@ -11,6 +11,13 @@ public sealed class AgentConversationResponse
 
     public required string EmployeeKey { get; init; }
 
+    public required Guid PersonId { get; init; }
+
+    public required string PersonDisplayName { get; init; }
+
+    /// <summary>
+    /// Backward-compatible alias for <see cref="PersonDisplayName"/>.
+    /// </summary>
     public required string EmployeeName { get; init; }
 
     public AgentProviderKind Provider { get; init; }

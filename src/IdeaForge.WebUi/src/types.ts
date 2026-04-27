@@ -11,6 +11,12 @@ export enum AgentStatus {
   Archived = 3
 }
 
+export enum PersonKind {
+  Unknown = 0,
+  Human = 1,
+  Ai = 2
+}
+
 export enum ClientResourceStatus {
   Draft = 0,
   Active = 1,
@@ -18,12 +24,21 @@ export enum ClientResourceStatus {
   Archived = 3
 }
 
+export type PersonDto = {
+  id: string;
+  kind: PersonKind;
+  displayName: string;
+  description?: string;
+  metadata: Record<string, string>;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+};
+
 export type EmployeeDto = {
   id: string;
+  personId: string;
   key: string;
-  name: string;
   role?: string;
-  description?: string;
   mission?: string;
   status: AgentStatus;
   specialties: string[];
@@ -42,15 +57,17 @@ export type AgentDataDto = {
 };
 
 export type AgentProfileDto = {
+  person: PersonDto;
   employee: EmployeeDto;
   agentData: AgentDataDto;
 };
 
 export type CreateAgentProfileRequest = {
   key: string;
-  name: string;
+  displayName: string;
+  personDescription?: string;
+  personMetadata: Record<string, string>;
   role?: string;
-  description?: string;
   mission?: string;
   specialties: string[];
   metadata: Record<string, string>;
@@ -60,6 +77,11 @@ export type CreateAgentProfileRequest = {
 };
 
 export type AgentConversationResponse = {
+  personId: string;
+  personDisplayName: string;
+  employeeId: string;
+  employeeKey: string;
+  employeeName: string;
   provider: AgentProviderKind;
   model: string;
   sessionId?: string;

@@ -11,6 +11,8 @@ public sealed class IdeaForgeDbContext : DbContext
 
     public DbSet<EmployeeEntity> Employees => Set<EmployeeEntity>();
 
+    public DbSet<PersonEntity> Persons => Set<PersonEntity>();
+
     public DbSet<AgentDataEntity> AgentData => Set<AgentDataEntity>();
 
     public DbSet<AgentExecutionEntity> AgentExecutions => Set<AgentExecutionEntity>();
@@ -23,6 +25,7 @@ public sealed class IdeaForgeDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ConfigurePersons(modelBuilder);
         ConfigureEmployees(modelBuilder);
         ConfigureAgentData(modelBuilder);
         ConfigureAgentExecutions(modelBuilder);
@@ -31,19 +34,36 @@ public sealed class IdeaForgeDbContext : DbContext
         ConfigureProjectRepositories(modelBuilder);
     }
 
+    private static void ConfigurePersons(ModelBuilder modelBuilder)
+    {
+        var entity = modelBuilder.Entity<PersonEntity>();
+        entity.ToTable("persons", "public");
+        entity.HasKey(person => person.Id);
+        entity.HasIndex(person => person.Kind).HasDatabaseName("ix_persons_kind");
+
+        entity.Property(person => person.Id).HasColumnName("id");
+        entity.Property(person => person.Kind).HasColumnName("kind").HasDefaultValue((short)1);
+        entity.Property(person => person.DisplayName).HasColumnName("display_name").IsRequired();
+        entity.Property(person => person.Description).HasColumnName("description");
+        entity.Property(person => person.MetadataJson).HasColumnName("metadata").HasColumnType("jsonb").HasDefaultValueSql("'{}'::jsonb").IsRequired();
+        entity.Property(person => person.CreatedAtUtc).HasColumnName("created_at").HasDefaultValueSql("now()");
+        entity.Property(person => person.UpdatedAtUtc).HasColumnName("updated_at").HasDefaultValueSql("now()");
+    }
+
     private static void ConfigureEmployees(ModelBuilder modelBuilder)
     {
         var entity = modelBuilder.Entity<EmployeeEntity>();
         entity.ToTable("employees", "public");
         entity.HasKey(employee => employee.Id);
         entity.HasIndex(employee => employee.Key).IsUnique().HasDatabaseName("uq_employees_key");
+        entity.HasIndex(employee => employee.PersonId).HasDatabaseName("ix_employees_person_id");
         entity.HasIndex(employee => employee.Status).HasDatabaseName("ix_employees_status");
+        entity.HasOne<PersonEntity>().WithMany().HasForeignKey(employee => employee.PersonId).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_employees_persons_person_id");
 
         entity.Property(employee => employee.Id).HasColumnName("id");
+        entity.Property(employee => employee.PersonId).HasColumnName("person_id");
         entity.Property(employee => employee.Key).HasColumnName("key").IsRequired();
-        entity.Property(employee => employee.Name).HasColumnName("name").IsRequired();
         entity.Property(employee => employee.Role).HasColumnName("role");
-        entity.Property(employee => employee.Description).HasColumnName("description");
         entity.Property(employee => employee.Mission).HasColumnName("mission");
         entity.Property(employee => employee.Status).HasColumnName("status").HasDefaultValue((short)1);
         entity.Property(employee => employee.SpecialtiesJson).HasColumnName("specialties").HasColumnType("jsonb").HasDefaultValueSql("'[]'::jsonb").IsRequired();

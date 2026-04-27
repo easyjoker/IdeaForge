@@ -1,20 +1,14 @@
 namespace IdeaForge.Agents.Abstractions;
 
-public sealed class Employee
+public sealed class Person
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public Guid PersonId { get; set; }
+    public PersonKind Kind { get; set; } = PersonKind.Human;
 
-    public string Key { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
 
-    public string? Role { get; set; }
-
-    public string? Mission { get; set; }
-
-    public AgentStatus Status { get; set; } = AgentStatus.Active;
-
-    public List<string> Specialties { get; set; } = [];
+    public string? Description { get; set; }
 
     public Dictionary<string, string> Metadata { get; set; } = [];
 

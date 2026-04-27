@@ -51,9 +51,9 @@ const { Paragraph, Text, Title } = Typography;
 
 type AgentFormValues = {
   key: string;
-  name: string;
+  displayName: string;
   role?: string;
-  description?: string;
+  personDescription?: string;
   mission?: string;
   specialtiesText?: string;
   provider: AgentProviderKind;
@@ -248,9 +248,10 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
     try {
       await api.createAgent({
         key: values.key,
-        name: values.name,
+        displayName: values.displayName,
+        personDescription: emptyToUndefined(values.personDescription),
+        personMetadata: {},
         role: emptyToUndefined(values.role),
-        description: emptyToUndefined(values.description),
         mission: emptyToUndefined(values.mission),
         specialties: parseList(values.specialtiesText),
         metadata: {},
@@ -306,7 +307,7 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
       </Row>
 
       <Card
-        title="Employee-style agents"
+        title="AI employees"
         extra={
           <Space>
             <Button icon={<ReloadOutlined />} onClick={loadAgents}>
@@ -336,7 +337,7 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
               title: "Employee",
               render: (_, record) => (
                 <Space direction="vertical" size={0}>
-                  <Text strong>{record.employee.name}</Text>
+                  <Text strong>{record.person.displayName}</Text>
                   <Text type="secondary">{record.employee.key}</Text>
                 </Space>
               )
@@ -383,7 +384,7 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
           <Form.Item name="key" label="Key" rules={[{ required: true, message: "Agent key is required" }]}>
             <Input placeholder="docs-writer" />
           </Form.Item>
-          <Form.Item name="name" label="Name" rules={[{ required: true, message: "Agent name is required" }]}>
+          <Form.Item name="displayName" label="Person Display Name" rules={[{ required: true, message: "Person display name is required" }]}>
             <Input placeholder="Docs Writer" />
           </Form.Item>
           <Form.Item name="role" label="Role">
@@ -403,7 +404,7 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
           <Form.Item name="specialtiesText" label="Specialties">
             <Input placeholder="documentation, api, review" />
           </Form.Item>
-          <Form.Item name="description" label="Description">
+          <Form.Item name="personDescription" label="Person Description">
             <Input.TextArea rows={2} />
           </Form.Item>
           <Form.Item name="mission" label="Mission">
@@ -419,7 +420,7 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
       </Modal>
 
       <Drawer
-        title={chatAgent ? `Chat with ${chatAgent.employee.name}` : "Chat with agent"}
+        title={chatAgent ? `Chat with ${chatAgent.person.displayName}` : "Chat with agent"}
         open={chatOpen}
         onClose={() => setChatOpen(false)}
         width={560}

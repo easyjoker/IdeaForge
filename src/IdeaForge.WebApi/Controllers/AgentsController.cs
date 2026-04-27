@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IdeaForge.WebApi.Controllers;
 
 /// <summary>
-/// Manage employee-style agents and their execution history.
+/// Manage AI employee agents and their execution history.
 /// </summary>
 [ApiController]
 [Route("api/agents")]
@@ -85,7 +85,7 @@ public sealed class AgentsController : ControllerBase
     }
 
     /// <summary>
-    /// Create a new employee-style agent.
+    /// Create a new AI person, employee record, and agent settings.
     /// </summary>
     [HttpPost]
     [ProducesResponseType<AgentProfileDto>(StatusCodes.Status201Created)]
@@ -111,7 +111,7 @@ public sealed class AgentsController : ControllerBase
     }
 
     /// <summary>
-    /// Update an existing employee-style agent.
+    /// Update an existing AI person, employee record, and agent settings.
     /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType<AgentProfileDto>(StatusCodes.Status200OK)]

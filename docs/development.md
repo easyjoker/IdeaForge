@@ -29,7 +29,7 @@ The startup initializer will:
 
 - create the configured database when it does not exist
 - apply EF Core migrations
-- create `employees`, `agent_data`, `agent_executions`, `client_company`, `client_project`, and `project_repository`
+- create `persons`, `employees`, `agent_data`, `agent_executions`, `client_company`, `client_project`, and `project_repository`
 
 Apply migrations manually:
 

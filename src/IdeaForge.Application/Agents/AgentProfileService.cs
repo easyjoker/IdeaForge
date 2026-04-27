@@ -35,24 +35,35 @@ public sealed class AgentProfileService : IAgentProfileService
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var existing = await _repository.GetByKeyAsync(request.Key, cancellationToken);
+        var key = RequireText(request.Key, nameof(request.Key));
+        var existing = await _repository.GetByKeyAsync(key, cancellationToken);
         if (existing is not null)
         {
-            throw new InvalidOperationException($"An agent with key '{request.Key}' already exists.");
+            throw new InvalidOperationException($"An agent with key '{key}' already exists.");
         }
 
+        var now = DateTimeOffset.UtcNow;
         var profile = new AgentProfile
         {
+            Person = new Person
+            {
+                Kind = PersonKind.Ai,
+                DisplayName = RequireText(request.DisplayName ?? request.Name, nameof(request.DisplayName)),
+                Description = NormalizeOptional(request.PersonDescription ?? request.Description),
+                Metadata = new Dictionary<string, string>(request.PersonMetadata, StringComparer.OrdinalIgnoreCase),
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now
+            },
             Employee = new Employee
             {
-                Key = request.Key.Trim(),
-                Name = request.Name.Trim(),
+                Key = key,
                 Role = request.Role?.Trim(),
-                Description = request.Description?.Trim(),
                 Mission = request.Mission?.Trim(),
                 Specialties = request.Specialties.Where(static item => !string.IsNullOrWhiteSpace(item)).Select(static item => item.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
                 Metadata = new Dictionary<string, string>(request.Metadata, StringComparer.OrdinalIgnoreCase),
-                Status = AgentStatus.Active
+                Status = AgentStatus.Active,
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now
             },
             AgentData = new AgentData
             {
@@ -63,6 +74,7 @@ public sealed class AgentProfileService : IAgentProfileService
             }
         };
 
+        profile.Employee.PersonId = profile.Person.Id;
         profile.AgentData.EmployeeId = profile.Employee.Id;
 
         var created = await _repository.AddAsync(profile, cancellationToken);
@@ -79,9 +91,12 @@ public sealed class AgentProfileService : IAgentProfileService
             return null;
         }
 
-        existing.Employee.Name = request.Name.Trim();
+        existing.Person.DisplayName = RequireText(request.DisplayName ?? request.Name, nameof(request.DisplayName));
+        existing.Person.Description = NormalizeOptional(request.PersonDescription ?? request.Description);
+        existing.Person.Metadata = new Dictionary<string, string>(request.PersonMetadata, StringComparer.OrdinalIgnoreCase);
+        existing.Person.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
         existing.Employee.Role = request.Role?.Trim();
-        existing.Employee.Description = request.Description?.Trim();
         existing.Employee.Mission = request.Mission?.Trim();
         existing.Employee.Status = request.Status;
         existing.Employee.Specialties = request.Specialties.Where(static item => !string.IsNullOrWhiteSpace(item)).Select(static item => item.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
@@ -166,16 +181,25 @@ public sealed class AgentProfileService : IAgentProfileService
             Employee = new EmployeeDto
             {
                 Id = profile.Employee.Id,
+                PersonId = profile.Employee.PersonId,
                 Key = profile.Employee.Key,
-                Name = profile.Employee.Name,
                 Role = profile.Employee.Role,
-                Description = profile.Employee.Description,
                 Mission = profile.Employee.Mission,
                 Status = profile.Employee.Status,
                 Specialties = profile.Employee.Specialties.ToArray(),
                 Metadata = new Dictionary<string, string>(profile.Employee.Metadata, StringComparer.OrdinalIgnoreCase),
                 CreatedAtUtc = profile.Employee.CreatedAtUtc,
                 UpdatedAtUtc = profile.Employee.UpdatedAtUtc
+            },
+            Person = new PersonDto
+            {
+                Id = profile.Person.Id,
+                Kind = profile.Person.Kind,
+                DisplayName = profile.Person.DisplayName,
+                Description = profile.Person.Description,
+                Metadata = new Dictionary<string, string>(profile.Person.Metadata, StringComparer.OrdinalIgnoreCase),
+                CreatedAtUtc = profile.Person.CreatedAtUtc,
+                UpdatedAtUtc = profile.Person.UpdatedAtUtc
             },
             AgentData = new AgentDataDto
             {
@@ -187,6 +211,19 @@ public sealed class AgentProfileService : IAgentProfileService
                 SessionUpdatedAtUtc = profile.AgentData.SessionUpdatedAtUtc
             }
         };
+
+    private static string RequireText(string? value, string parameterName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException($"{parameterName} is required.", parameterName);
+        }
+
+        return value.Trim();
+    }
+
+    private static string? NormalizeOptional(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static AgentExecutionDto Map(AgentExecutionRecord execution) =>
         new()

@@ -25,6 +25,7 @@ Defines shared contracts and domain models:
 - `IAgentProvider`
 - `AgentExecutionRequest`
 - `AgentExecutionResult`
+- `Person`
 - `Employee`
 - `AgentData`
 - `AgentExecutionRecord`
@@ -49,7 +50,7 @@ Provides provider registration and lookup through:
 
 Contains use cases and application-facing DTOs:
 
-- creating and updating employee-style agents
+- creating and updating AI employee agents
 - reporting completed executions
 - sending chat prompts to a selected employee
 - mapping domain models to API DTOs
@@ -83,12 +84,22 @@ The normal chat flow is:
 
 ## Data Ownership
 
+`persons`
+
+Stores stable person identity for both human and AI personnel:
+
+- kind (`Human` or `AI`)
+- display name
+- description
+- metadata
+- created and updated timestamps
+
 `employees`
 
-Stores stable employee identity:
+Stores the company employment/work-assignment record:
 
+- person reference
 - key
-- name
 - role
 - mission
 - specialties
@@ -97,7 +108,7 @@ Stores stable employee identity:
 
 `agent_data`
 
-Stores current runtime state:
+Stores current runtime state for AI employees only:
 
 - provider
 - model

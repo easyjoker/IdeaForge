@@ -3,12 +3,17 @@ using IdeaForge.Agents.Abstractions;
 namespace IdeaForge.Application.Agents;
 
 /// <summary>
-/// Full agent profile composed of employee data and runtime agent data.
+/// Full agent profile composed of person identity, employee data, and runtime agent data.
 /// </summary>
 public sealed class AgentProfileDto
 {
     /// <summary>
-    /// Static employee information.
+    /// Person identity information.
+    /// </summary>
+    public required PersonDto Person { get; init; }
+
+    /// <summary>
+    /// Employee information.
     /// </summary>
     public required EmployeeDto Employee { get; init; }
 
@@ -19,7 +24,48 @@ public sealed class AgentProfileDto
 }
 
 /// <summary>
-/// Static employee information stored for an agent.
+/// Person identity stored for an employee or AI agent.
+/// </summary>
+public sealed class PersonDto
+{
+    /// <summary>
+    /// Unique person identifier.
+    /// </summary>
+    public required Guid Id { get; init; }
+
+    /// <summary>
+    /// Type of person. Values: 0 = Unknown, 1 = Human, 2 = AI.
+    /// </summary>
+    public PersonKind Kind { get; init; }
+
+    /// <summary>
+    /// Display name used in user interfaces.
+    /// </summary>
+    public required string DisplayName { get; init; }
+
+    /// <summary>
+    /// Optional person profile description.
+    /// </summary>
+    public string? Description { get; init; }
+
+    /// <summary>
+    /// Free-form person metadata such as avatar, locale, or contact tags.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
+
+    /// <summary>
+    /// UTC timestamp when this person was created.
+    /// </summary>
+    public DateTimeOffset CreatedAtUtc { get; init; }
+
+    /// <summary>
+    /// UTC timestamp when this person was last updated.
+    /// </summary>
+    public DateTimeOffset UpdatedAtUtc { get; init; }
+}
+
+/// <summary>
+/// Employee work assignment information stored for an agent.
 /// </summary>
 public sealed class EmployeeDto
 {
@@ -29,24 +75,19 @@ public sealed class EmployeeDto
     public required Guid Id { get; init; }
 
     /// <summary>
+    /// Person identity linked to this employee record.
+    /// </summary>
+    public required Guid PersonId { get; init; }
+
+    /// <summary>
     /// Stable employee key used by scripts and APIs.
     /// </summary>
     public required string Key { get; init; }
 
     /// <summary>
-    /// Display name of the employee-style agent.
-    /// </summary>
-    public required string Name { get; init; }
-
-    /// <summary>
     /// Functional role of the employee.
     /// </summary>
     public string? Role { get; init; }
-
-    /// <summary>
-    /// Short description of what this employee does.
-    /// </summary>
-    public string? Description { get; init; }
 
     /// <summary>
     /// Long-term mission or responsibility of the employee.

@@ -1,7 +1,7 @@
 namespace IdeaForge.Application.Agents;
 
 /// <summary>
-/// Request used to send a prompt to a specific employee-style agent.
+/// Request used to send a prompt to a specific AI employee agent.
 /// </summary>
 public sealed class AgentConversationRequest
 {

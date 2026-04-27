@@ -82,13 +82,14 @@ http://localhost:5246/swagger
 
 ## Core Model
 
-ideaForge separates an agent into three concerns:
+ideaForge separates company personnel and agents into three concerns:
 
-- `employee`: stable identity and business role, such as name, key, mission, and specialties
-- `agent_data`: runtime configuration, such as provider, model, session id, and system prompt
+- `person`: stable person identity, such as human/AI kind, display name, description, and metadata
+- `employee`: company work assignment, such as employee key, role, mission, specialties, and lifecycle status
+- `agent_data`: AI-only runtime configuration, such as provider, model, session id, and system prompt
 - `agent_executions`: historical records for completed prompt executions
 
-This lets an employee behave like a dedicated specialist while still allowing runtime state to evolve after real executions.
+This lets human and AI employees share the same personnel model while keeping LLM runtime state separate and optional.
 
 Client delivery settings use this hierarchy:
 
@@ -98,7 +99,7 @@ Client delivery settings use this hierarchy:
 
 ## Main API Flow
 
-1. Create an employee-style agent with `POST /api/agents`.
+1. Create an AI employee agent with `POST /api/agents`.
 2. Send a prompt to that employee with `POST /api/agents/by-key/{key}/chat`.
 3. Read execution history with `GET /api/agents/by-key/{key}/executions`.
 

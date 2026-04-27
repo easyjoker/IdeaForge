@@ -25,9 +25,12 @@ Example body:
 ```json
 {
   "key": "docs-writer",
-  "name": "Docs Writer",
+  "displayName": "Docs Writer",
+  "personDescription": "AI person that writes and maintains project documentation.",
+  "personMetadata": {
+    "kind": "ai"
+  },
   "role": "Documentation Agent",
-  "description": "Writes and maintains project documentation.",
   "mission": "Keep ideaForge documentation accurate and useful.",
   "specialties": ["documentation", "api", "developer-experience"],
   "metadata": {
@@ -45,6 +48,12 @@ Provider values:
 - `2` = `Codex`
 
 Status defaults to `Active` when creating an agent.
+
+The API creates three records for an agent:
+
+- `person`: identity profile, always `AI` for this endpoint
+- `employee`: company work-assignment profile
+- `agent_data`: LLM provider, model, and session state
 
 ## List Agents
 
@@ -80,9 +89,12 @@ Example body:
 
 ```json
 {
-  "name": "Docs Writer",
+  "displayName": "Docs Writer",
+  "personDescription": "AI person that writes and maintains project documentation.",
+  "personMetadata": {
+    "kind": "ai"
+  },
   "role": "Documentation Agent",
-  "description": "Writes and maintains project documentation.",
   "mission": "Keep ideaForge documentation accurate and useful.",
   "status": 1,
   "specialties": ["documentation", "api", "developer-experience"],
