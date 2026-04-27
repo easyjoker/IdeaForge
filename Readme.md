@@ -54,6 +54,20 @@ Open Swagger:
 http://localhost:5246/swagger
 ```
 
+Run the React UI:
+
+```powershell
+cd D:\projects\IdeaForge\src\IdeaForge.WebUi
+npm install
+npm run dev
+```
+
+The UI is available at:
+
+```text
+http://localhost:5173
+```
+
 Run with Docker Compose:
 
 ```powershell

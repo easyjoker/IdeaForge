@@ -5,10 +5,13 @@
 
 **/bin/
 **/obj/
+**/node_modules/
+**/dist/
 
 *.log
 *.tmp
 *.bak
+*.tsbuildinfo
 
 .env
 .env.*

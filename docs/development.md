@@ -70,6 +70,35 @@ Swagger:
 http://localhost:5246/swagger
 ```
 
+## Run React UI
+
+Install dependencies:
+
+```powershell
+cd D:\projects\IdeaForge\src\IdeaForge.WebUi
+npm install
+```
+
+Start the Vite development server:
+
+```powershell
+npm run dev
+```
+
+Default UI URL:
+
+```text
+http://localhost:5173
+```
+
+The development server proxies `/api` to `http://localhost:5246`, so start the Web API before using the UI. Override the proxy target with `VITE_IDEAFORGE_API_TARGET` when needed.
+
+Build the UI:
+
+```powershell
+npm run build
+```
+
 ## Docker Compose
 
 Start the Web API container:
