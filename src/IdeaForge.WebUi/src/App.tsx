@@ -1590,13 +1590,13 @@ function ProviderSettingsForm({ provider }: { provider?: AgentProviderKind }) {
 function CodexAgentSettingsForm() {
   return (
     <>
-      <Form.Item name="codexReasoning" label="Reasoning 思考深度" preserve={false} extra="控制 Codex 的思考深度，會傳入 --reasoning；留空則使用 Codex 預設值。">
+      <Form.Item name="codexReasoning" label="Reasoning 思考深度" preserve={false} extra="控制 Codex 的思考深度，會傳入 --reasoning；可用值：low、medium、high；留空則使用 Codex 預設值。">
         <Select allowClear placeholder="Use Codex default" options={codexIntensityOptions} />
       </Form.Item>
-      <Form.Item name="codexCompute" label="Compute token 使用程度" preserve={false} extra="控制 Codex 可使用的 token/計算資源程度，會傳入 --compute；留空則使用 Codex 預設值。">
+      <Form.Item name="codexCompute" label="Compute token 使用程度" preserve={false} extra="控制 Codex 可使用的 token/計算資源程度，會傳入 --compute；可用值：low、medium、high；留空則使用 Codex 預設值。">
         <Select allowClear placeholder="Use Codex default" options={codexIntensityOptions} />
       </Form.Item>
-      <Form.Item name="codexEffort" label="Effort 積極度" preserve={false} extra="控制 Codex 執行任務時的積極程度，會傳入 --effort；留空則使用 Codex 預設值。">
+      <Form.Item name="codexEffort" label="Effort 積極度" preserve={false} extra="控制 Codex 執行任務時的積極程度，會傳入 --effort；可用值：low、medium、high；留空則使用 Codex 預設值。">
         <Select allowClear placeholder="Use Codex default" options={codexIntensityOptions} />
       </Form.Item>
     </>
