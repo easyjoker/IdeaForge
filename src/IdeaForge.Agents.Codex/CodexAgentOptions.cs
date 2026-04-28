@@ -13,4 +13,10 @@ public sealed class CodexAgentOptions
     public bool SkipGitRepoCheck { get; set; } = true;
 
     public bool JsonOutput { get; set; }
+
+    public string? DefaultReasoning { get; set; }
+
+    public string? DefaultEffort { get; set; }
+
+    public string? DefaultCompute { get; set; }
 }

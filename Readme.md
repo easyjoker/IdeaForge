@@ -86,7 +86,7 @@ ideaForge separates company personnel and agents into three concerns:
 
 - `person`: stable person identity, such as human/AI kind, display name, description, metadata, and AI settings when applicable
 - `employee`: company work assignment, such as employee key, role, mission, specialties, and lifecycle status
-- `agent_data`: person-level AI runtime configuration, such as provider, model, session id, and system prompt
+- `agent_data`: person-level AI runtime configuration, such as provider, model, session id, system prompt, and Codex CLI tuning settings
 - `agent_executions`: historical records for completed prompt executions
 
 This lets human and AI employees share the same personnel model while keeping LLM runtime state separate and optional.
@@ -114,6 +114,9 @@ Run Codex and report execution back to the API:
 ```powershell
 .\codex-agent.ps1 `
   -Prompt "Summarize this repository" `
+  -Reasoning high `
+  -Effort high `
+  -Compute aggressive `
   -Json `
   -EmployeeKey "docs-writer" `
   -AgentApiBaseUrl "http://localhost:5246"
@@ -130,6 +133,12 @@ Run Copilot and report execution back to the API:
 ```
 
 Both wrappers default to `gpt-5.4`.
+
+Codex-specific tuning fields are available on AI person settings and `codex-agent.ps1`:
+
+- `codexReasoning` / `-Reasoning` maps to `codex exec --reasoning`.
+- `codexEffort` / `-Effort` maps to `codex exec --effort`.
+- `codexCompute` / `-Compute` maps to `codex exec --compute`.
 
 Model registries:
 

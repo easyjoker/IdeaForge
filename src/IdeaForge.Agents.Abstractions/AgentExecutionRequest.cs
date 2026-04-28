@@ -16,5 +16,11 @@ public sealed record AgentExecutionRequest
 
     public string? SchemaPath { get; init; }
 
+    public string? CodexReasoning { get; init; }
+
+    public string? CodexEffort { get; init; }
+
+    public string? CodexCompute { get; init; }
+
     public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
 }

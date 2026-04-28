@@ -49,6 +49,15 @@ param(
     [string]$SchemaPath,
 
     [Parameter()]
+    [string]$Reasoning,
+
+    [Parameter()]
+    [string]$Effort,
+
+    [Parameter()]
+    [string]$Compute,
+
+    [Parameter()]
     [ValidateSet("always", "never", "auto")]
     [string]$Color = "auto",
 
@@ -258,6 +267,21 @@ process {
     if ($Profile) {
         $args += "--profile"
         $args += $Profile
+    }
+
+    if ($Reasoning) {
+        $args += "--reasoning"
+        $args += $Reasoning
+    }
+
+    if ($Effort) {
+        $args += "--effort"
+        $args += $Effort
+    }
+
+    if ($Compute) {
+        $args += "--compute"
+        $args += $Compute
     }
 
     if ($Sandbox -and -not $DangerouslyBypassApprovalsAndSandbox) {

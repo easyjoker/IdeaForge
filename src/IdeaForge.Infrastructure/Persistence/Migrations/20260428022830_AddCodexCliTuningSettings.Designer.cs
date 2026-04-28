@@ -3,6 +3,7 @@ using System;
 using IdeaForge.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IdeaForge.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdeaForgeDbContext))]
-    partial class IdeaForgeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428022830_AddCodexCliTuningSettings")]
+    partial class AddCodexCliTuningSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

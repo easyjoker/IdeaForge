@@ -43,6 +43,7 @@ public sealed class AgentProfileService : IAgentProfileService
         }
 
         var now = DateTimeOffset.UtcNow;
+        var provider = ResolveProvider(request.Provider, existing: null);
         var profile = new AgentProfile
         {
             Person = new Person
@@ -68,9 +69,12 @@ public sealed class AgentProfileService : IAgentProfileService
             AgentData = new AgentData
             {
                 PersonId = Guid.Empty,
-                Provider = ResolveProvider(request.Provider, existing: null),
+                Provider = provider,
                 Model = string.IsNullOrWhiteSpace(request.Model) ? "gpt-5.4" : request.Model.Trim(),
-                SystemPrompt = request.SystemPrompt
+                SystemPrompt = NormalizeOptional(request.SystemPrompt),
+                CodexReasoning = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexReasoning) : null,
+                CodexEffort = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexEffort) : null,
+                CodexCompute = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexCompute) : null
             }
         };
 
@@ -103,9 +107,13 @@ public sealed class AgentProfileService : IAgentProfileService
         existing.Employee.Metadata = new Dictionary<string, string>(request.Metadata, StringComparer.OrdinalIgnoreCase);
         existing.Employee.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
-        existing.AgentData.Provider = ResolveProvider(request.Provider, existing.AgentData.Provider);
+        var provider = ResolveProvider(request.Provider, existing.AgentData.Provider);
+        existing.AgentData.Provider = provider;
         existing.AgentData.Model = string.IsNullOrWhiteSpace(request.Model) ? existing.AgentData.Model : request.Model.Trim();
-        existing.AgentData.SystemPrompt = request.SystemPrompt;
+        existing.AgentData.SystemPrompt = NormalizeOptional(request.SystemPrompt);
+        existing.AgentData.CodexReasoning = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexReasoning) : null;
+        existing.AgentData.CodexEffort = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexEffort) : null;
+        existing.AgentData.CodexCompute = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexCompute) : null;
 
         var updated = await _repository.UpdateAsync(existing, cancellationToken);
         return Map(updated);
@@ -207,6 +215,9 @@ public sealed class AgentProfileService : IAgentProfileService
                 Model = profile.AgentData.Model,
                 SessionId = profile.AgentData.SessionId,
                 SystemPrompt = profile.AgentData.SystemPrompt,
+                CodexReasoning = profile.AgentData.CodexReasoning,
+                CodexEffort = profile.AgentData.CodexEffort,
+                CodexCompute = profile.AgentData.CodexCompute,
                 LastUsedAtUtc = profile.AgentData.LastUsedAtUtc,
                 SessionUpdatedAtUtc = profile.AgentData.SessionUpdatedAtUtc
             }

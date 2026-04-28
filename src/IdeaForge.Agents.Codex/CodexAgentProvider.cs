@@ -116,6 +116,10 @@ public sealed class CodexAgentProvider : IAgentProvider
             arguments.Append("--add-dir ").Append(Escape(Path.GetFullPath(addDir))).Append(' ');
         }
 
+        AppendOptionalArgument(arguments, "--reasoning", ResolveCodexReasoning(request));
+        AppendOptionalArgument(arguments, "--effort", ResolveCodexEffort(request));
+        AppendOptionalArgument(arguments, "--compute", ResolveCodexCompute(request));
+
         arguments.Append("--model ").Append(Escape(ResolveModel(request))).Append(' ');
         arguments.Append(Escape(request.Prompt));
 
@@ -124,6 +128,15 @@ public sealed class CodexAgentProvider : IAgentProvider
 
     private string ResolveModel(AgentExecutionRequest request) =>
         string.IsNullOrWhiteSpace(request.Model) ? _options.DefaultModel : request.Model;
+
+    private string? ResolveCodexReasoning(AgentExecutionRequest request) =>
+        string.IsNullOrWhiteSpace(request.CodexReasoning) ? _options.DefaultReasoning : request.CodexReasoning;
+
+    private string? ResolveCodexEffort(AgentExecutionRequest request) =>
+        string.IsNullOrWhiteSpace(request.CodexEffort) ? _options.DefaultEffort : request.CodexEffort;
+
+    private string? ResolveCodexCompute(AgentExecutionRequest request) =>
+        string.IsNullOrWhiteSpace(request.CodexCompute) ? _options.DefaultCompute : request.CodexCompute;
 
     private string ResolveWorkingDirectory(AgentExecutionRequest request) =>
         string.IsNullOrWhiteSpace(request.WorkingDirectory)
@@ -184,6 +197,14 @@ public sealed class CodexAgentProvider : IAgentProvider
             {
                 yield return Path.Combine(entry, fileName);
             }
+        }
+    }
+
+    private static void AppendOptionalArgument(StringBuilder arguments, string name, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            arguments.Append(name).Append(' ').Append(Escape(value.Trim())).Append(' ');
         }
     }
 

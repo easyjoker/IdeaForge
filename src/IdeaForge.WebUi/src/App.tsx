@@ -66,6 +66,9 @@ type AgentFormValues = {
   provider: AgentProviderKind;
   model?: string;
   systemPrompt?: string;
+  codexReasoning?: string;
+  codexEffort?: string;
+  codexCompute?: string;
 };
 
 type PersonFormValues = {
@@ -75,6 +78,9 @@ type PersonFormValues = {
   provider?: AgentProviderKind;
   model?: string;
   systemPrompt?: string;
+  codexReasoning?: string;
+  codexEffort?: string;
+  codexCompute?: string;
 };
 
 type EmployeeFormValues = {
@@ -284,7 +290,9 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
   const [editingPerson, setEditingPerson] = useState<PersonDirectoryDto>();
   const [personForm] = Form.useForm<PersonFormValues>();
   const watchedPersonKind = Form.useWatch("kind", personForm);
+  const watchedPersonProvider = Form.useWatch("provider", personForm);
   const personFormIsAi = watchedPersonKind === PersonKind.Ai;
+  const personFormIsCodex = personFormIsAi && watchedPersonProvider === AgentProviderKind.Codex;
   const personSaveInFlightRef = useRef(false);
 
   useEffect(() => {
@@ -373,7 +381,10 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
             description: person.description,
             provider: person.agentSettings?.provider ?? AgentProviderKind.Codex,
             model: person.agentSettings?.model ?? "gpt-5.4",
-            systemPrompt: person.agentSettings?.systemPrompt
+            systemPrompt: person.agentSettings?.systemPrompt,
+            codexReasoning: person.agentSettings?.codexReasoning,
+            codexEffort: person.agentSettings?.codexEffort,
+            codexCompute: person.agentSettings?.codexCompute
           }
         : {
             kind: PersonKind.Human,
@@ -511,6 +522,7 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
               <Form.Item name="systemPrompt" label="System Prompt">
                 <Input.TextArea rows={3} placeholder="Optional instructions for this AI person." />
               </Form.Item>
+              {personFormIsCodex && <CodexCliSettingsFields />}
             </Card>
           )}
           <Button type="primary" htmlType="submit" block loading={savingPerson} disabled={savingPerson}>
@@ -780,6 +792,8 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
   const [chatLoading, setChatLoading] = useState(false);
   const [agentForm] = Form.useForm<AgentFormValues>();
   const [chatForm] = Form.useForm<{ prompt: string }>();
+  const watchedAgentProvider = Form.useWatch("provider", agentForm);
+  const agentFormIsCodex = watchedAgentProvider === AgentProviderKind.Codex;
 
   useEffect(() => {
     void loadAgents();
@@ -809,7 +823,10 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
         metadata: {},
         provider: values.provider,
         model: emptyToUndefined(values.model),
-        systemPrompt: emptyToUndefined(values.systemPrompt)
+        systemPrompt: emptyToUndefined(values.systemPrompt),
+        codexReasoning: emptyToUndefined(values.codexReasoning),
+        codexEffort: emptyToUndefined(values.codexEffort),
+        codexCompute: emptyToUndefined(values.codexCompute)
       });
       messageApi.success("Agent created");
       setCreateOpen(false);
@@ -965,6 +982,7 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
           <Form.Item name="systemPrompt" label="System Prompt">
             <Input.TextArea rows={3} />
           </Form.Item>
+          {agentFormIsCodex && <CodexCliSettingsFields />}
           <Button type="primary" htmlType="submit" block>
             Create Agent
           </Button>
@@ -1546,8 +1564,27 @@ function buildAgentSettings(values: PersonFormValues) {
   return {
     provider: values.provider ?? AgentProviderKind.Codex,
     model: emptyToUndefined(values.model),
-    systemPrompt: emptyToUndefined(values.systemPrompt)
+    systemPrompt: emptyToUndefined(values.systemPrompt),
+    codexReasoning: emptyToUndefined(values.codexReasoning),
+    codexEffort: emptyToUndefined(values.codexEffort),
+    codexCompute: emptyToUndefined(values.codexCompute)
   };
+}
+
+function CodexCliSettingsFields() {
+  return (
+    <>
+      <Form.Item name="codexReasoning" label="Codex Reasoning" preserve={false} extra="Passed to Codex CLI as --reasoning; leave empty to use CLI defaults.">
+        <Input placeholder="for example: high" />
+      </Form.Item>
+      <Form.Item name="codexEffort" label="Codex Effort" preserve={false} extra="Passed to Codex CLI as --effort; leave empty to use CLI defaults.">
+        <Input placeholder="for example: high" />
+      </Form.Item>
+      <Form.Item name="codexCompute" label="Codex Compute" preserve={false} extra="Passed to Codex CLI as --compute; leave empty to use CLI defaults.">
+        <Input placeholder="for example: aggressive" />
+      </Form.Item>
+    </>
+  );
 }
 
 function parseList(value?: string) {

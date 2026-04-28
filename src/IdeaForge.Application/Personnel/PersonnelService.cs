@@ -177,17 +177,23 @@ public sealed class PersonnelService : IPersonnelService
     public Task<bool> DeleteEmployeeAsync(Guid id, CancellationToken cancellationToken = default) =>
         _repository.DeleteEmployeeAsync(id, cancellationToken);
 
-    private static AgentData CreateAgentData(Guid personId, UpsertAgentSettingsRequest? request, AgentData? existing) =>
-        new()
+    private static AgentData CreateAgentData(Guid personId, UpsertAgentSettingsRequest? request, AgentData? existing)
+    {
+        var provider = ResolveProvider(request?.Provider, existing?.Provider);
+        return new AgentData
         {
             PersonId = personId,
-            Provider = ResolveProvider(request?.Provider, existing?.Provider),
+            Provider = provider,
             Model = string.IsNullOrWhiteSpace(request?.Model) ? existing?.Model ?? "gpt-5.4" : request.Model.Trim(),
             SessionId = existing?.SessionId,
             SystemPrompt = request is null ? existing?.SystemPrompt : NormalizeOptional(request.SystemPrompt),
+            CodexReasoning = provider == AgentProviderKind.Codex ? request is null ? existing?.CodexReasoning : NormalizeOptional(request.CodexReasoning) : null,
+            CodexEffort = provider == AgentProviderKind.Codex ? request is null ? existing?.CodexEffort : NormalizeOptional(request.CodexEffort) : null,
+            CodexCompute = provider == AgentProviderKind.Codex ? request is null ? existing?.CodexCompute : NormalizeOptional(request.CodexCompute) : null,
             LastUsedAtUtc = existing?.LastUsedAtUtc,
             SessionUpdatedAtUtc = existing?.SessionUpdatedAtUtc
         };
+    }
 
     private static AgentProviderKind ResolveProvider(AgentProviderKind? requested, AgentProviderKind? existing) =>
         requested is AgentProviderKind.Copilot or AgentProviderKind.Codex
@@ -239,6 +245,9 @@ public sealed class PersonnelService : IPersonnelService
             Model = agentData.Model,
             SessionId = agentData.SessionId,
             SystemPrompt = agentData.SystemPrompt,
+            CodexReasoning = agentData.CodexReasoning,
+            CodexEffort = agentData.CodexEffort,
+            CodexCompute = agentData.CodexCompute,
             LastUsedAtUtc = agentData.LastUsedAtUtc,
             SessionUpdatedAtUtc = agentData.SessionUpdatedAtUtc
         };

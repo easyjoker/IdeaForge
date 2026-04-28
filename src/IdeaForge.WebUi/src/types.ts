@@ -55,6 +55,9 @@ export type AgentDataDto = {
   model: string;
   sessionId?: string;
   systemPrompt?: string;
+  codexReasoning?: string;
+  codexEffort?: string;
+  codexCompute?: string;
   lastUsedAtUtc?: string;
   sessionUpdatedAtUtc?: string;
 };
@@ -94,6 +97,9 @@ export type UpsertAgentSettingsRequest = {
   provider: AgentProviderKind;
   model?: string;
   systemPrompt?: string;
+  codexReasoning?: string;
+  codexEffort?: string;
+  codexCompute?: string;
 };
 
 export type CreateEmployeeRequest = {
@@ -126,6 +132,9 @@ export type CreateAgentProfileRequest = {
   provider: AgentProviderKind;
   model?: string;
   systemPrompt?: string;
+  codexReasoning?: string;
+  codexEffort?: string;
+  codexCompute?: string;
 };
 
 export type AgentConversationResponse = {

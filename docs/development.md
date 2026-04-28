@@ -169,10 +169,20 @@ Codex example:
 .\codex-agent.ps1 `
   -Prompt "Summarize this repository" `
   -Json `
+  -Reasoning high `
+  -Effort high `
+  -Compute aggressive `
   -WorkingDirectory "D:\projects\IdeaForge" `
   -EmployeeKey "docs-writer" `
   -AgentApiBaseUrl "http://localhost:5246"
 ```
+
+Codex tuning:
+
+- `-Reasoning` maps to `codex exec --reasoning`.
+- `-Effort` maps to `codex exec --effort`.
+- `-Compute` maps to `codex exec --compute`.
+- The Web API stores the same values as `agentSettings.codexReasoning`, `agentSettings.codexEffort`, and `agentSettings.codexCompute` on AI people.
 
 Copilot example:
 

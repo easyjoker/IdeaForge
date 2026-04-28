@@ -31,7 +31,10 @@ Example body:
   "agentSettings": {
     "provider": 2,
     "model": "gpt-5.4",
-    "systemPrompt": "Answer in concise Traditional Chinese."
+    "systemPrompt": "Answer in concise Traditional Chinese.",
+    "codexReasoning": "high",
+    "codexEffort": "high",
+    "codexCompute": "aggressive"
   }
 }
 ```
@@ -41,7 +44,7 @@ Person kind values:
 - `1` = `Human`
 - `2` = `AI`
 
-The `agentSettings` object is used only when `kind` is `2` (`AI`). If omitted for an AI person, the API creates default Codex settings with `gpt-5.4`.
+The `agentSettings` object is used only when `kind` is `2` (`AI`). If omitted for an AI person, the API creates default Codex settings with `gpt-5.4`. `codexReasoning`, `codexEffort`, and `codexCompute` are optional Codex-only fields passed to Codex CLI as `--reasoning`, `--effort`, and `--compute`.
 
 ## List People
 
@@ -128,7 +131,10 @@ Example body:
   },
   "provider": 2,
   "model": "gpt-5.4",
-  "systemPrompt": "Answer in concise Traditional Chinese."
+  "systemPrompt": "Answer in concise Traditional Chinese.",
+  "codexReasoning": "high",
+  "codexEffort": "high",
+  "codexCompute": "aggressive"
 }
 ```
 
@@ -143,7 +149,7 @@ The API creates three records for an agent:
 
 - `person`: identity profile, always `AI` for this endpoint
 - `employee`: company work-assignment profile
-- `agent_data`: LLM provider, model, and session state
+- `agent_data`: LLM provider, model, session state, and Codex CLI tuning settings
 
 ## List Agents
 
@@ -193,7 +199,10 @@ Example body:
   },
   "provider": 2,
   "model": "gpt-5.4",
-  "systemPrompt": "Answer in concise Traditional Chinese."
+  "systemPrompt": "Answer in concise Traditional Chinese.",
+  "codexReasoning": "high",
+  "codexEffort": "high",
+  "codexCompute": "aggressive"
 }
 ```
 

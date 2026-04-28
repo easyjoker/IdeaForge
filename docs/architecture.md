@@ -37,7 +37,7 @@ Implements `IAgentProvider` with GitHub Copilot SDK. It supports named sessions 
 
 `IdeaForge.Agents.Codex`
 
-Implements `IAgentProvider` with Codex CLI execution. It currently starts Codex through the command line and does not yet resume an existing session through `AgentExecutionRequest.SessionId`.
+Implements `IAgentProvider` with Codex CLI execution. It maps optional Codex tuning values to `--reasoning`, `--effort`, and `--compute`. It currently starts Codex through the command line and does not yet resume an existing session through `AgentExecutionRequest.SessionId`.
 
 `IdeaForge.Agents`
 
@@ -115,6 +115,7 @@ Stores current runtime state for AI people only:
 - model
 - session id
 - system prompt
+- Codex CLI tuning settings: reasoning, effort, and compute
 - last used timestamp
 - session updated timestamp
 

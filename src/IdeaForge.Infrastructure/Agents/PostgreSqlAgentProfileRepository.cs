@@ -22,7 +22,7 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
             select
                 p.id as person_id, p.kind as person_kind, p.display_name, p.description as person_description, p.metadata as person_metadata, p.created_at as person_created_at, p.updated_at as person_updated_at,
                 e.id as employee_id, e.person_id as employee_person_id, e.key, e.role, e.mission, e.status, e.specialties, e.metadata as employee_metadata, e.created_at as employee_created_at, e.updated_at as employee_updated_at,
-                a.provider, a.model, a.session_id, a.system_prompt, a.last_used_at, a.session_updated_at
+                a.provider, a.model, a.session_id, a.system_prompt, a.codex_reasoning, a.codex_effort, a.codex_compute, a.last_used_at, a.session_updated_at
             from public.employees e
             join public.persons p on p.id = e.person_id
             join public.agent_data a on a.person_id = p.id
@@ -48,7 +48,7 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
             select
                 p.id as person_id, p.kind as person_kind, p.display_name, p.description as person_description, p.metadata as person_metadata, p.created_at as person_created_at, p.updated_at as person_updated_at,
                 e.id as employee_id, e.person_id as employee_person_id, e.key, e.role, e.mission, e.status, e.specialties, e.metadata as employee_metadata, e.created_at as employee_created_at, e.updated_at as employee_updated_at,
-                a.provider, a.model, a.session_id, a.system_prompt, a.last_used_at, a.session_updated_at
+                a.provider, a.model, a.session_id, a.system_prompt, a.codex_reasoning, a.codex_effort, a.codex_compute, a.last_used_at, a.session_updated_at
             from public.employees e
             join public.persons p on p.id = e.person_id
             join public.agent_data a on a.person_id = p.id
@@ -69,7 +69,7 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
             select
                 p.id as person_id, p.kind as person_kind, p.display_name, p.description as person_description, p.metadata as person_metadata, p.created_at as person_created_at, p.updated_at as person_updated_at,
                 e.id as employee_id, e.person_id as employee_person_id, e.key, e.role, e.mission, e.status, e.specialties, e.metadata as employee_metadata, e.created_at as employee_created_at, e.updated_at as employee_updated_at,
-                a.provider, a.model, a.session_id, a.system_prompt, a.last_used_at, a.session_updated_at
+                a.provider, a.model, a.session_id, a.system_prompt, a.codex_reasoning, a.codex_effort, a.codex_compute, a.last_used_at, a.session_updated_at
             from public.employees e
             join public.persons p on p.id = e.person_id
             join public.agent_data a on a.person_id = p.id
@@ -126,11 +126,11 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
         const string agentDataSql = """
             insert into public.agent_data
             (
-                person_id, provider, model, session_id, system_prompt, last_used_at, session_updated_at
+                person_id, provider, model, session_id, system_prompt, codex_reasoning, codex_effort, codex_compute, last_used_at, session_updated_at
             )
             values
             (
-                @person_id, @provider, @model, @session_id, @system_prompt, @last_used_at, @session_updated_at
+                @person_id, @provider, @model, @session_id, @system_prompt, @codex_reasoning, @codex_effort, @codex_compute, @last_used_at, @session_updated_at
             );
             """;
 
@@ -195,6 +195,9 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
                 model = @model,
                 session_id = @session_id,
                 system_prompt = @system_prompt,
+                codex_reasoning = @codex_reasoning,
+                codex_effort = @codex_effort,
+                codex_compute = @codex_compute,
                 last_used_at = @last_used_at,
                 session_updated_at = @session_updated_at
             where person_id = @person_id;
@@ -320,6 +323,9 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
         command.Parameters.AddWithValue("model", agentData.Model);
         command.Parameters.AddWithValue("session_id", (object?)agentData.SessionId ?? DBNull.Value);
         command.Parameters.AddWithValue("system_prompt", (object?)agentData.SystemPrompt ?? DBNull.Value);
+        command.Parameters.AddWithValue("codex_reasoning", (object?)agentData.CodexReasoning ?? DBNull.Value);
+        command.Parameters.AddWithValue("codex_effort", (object?)agentData.CodexEffort ?? DBNull.Value);
+        command.Parameters.AddWithValue("codex_compute", (object?)agentData.CodexCompute ?? DBNull.Value);
         command.Parameters.AddWithValue("last_used_at", (object?)agentData.LastUsedAtUtc ?? DBNull.Value);
         command.Parameters.AddWithValue("session_updated_at", (object?)agentData.SessionUpdatedAtUtc ?? DBNull.Value);
     }
@@ -362,6 +368,9 @@ public sealed class PostgreSqlAgentProfileRepository : IAgentProfileRepository
                 Model = reader.GetString(reader.GetOrdinal("model")),
                 SessionId = reader.IsDBNull(reader.GetOrdinal("session_id")) ? null : reader.GetString(reader.GetOrdinal("session_id")),
                 SystemPrompt = reader.IsDBNull(reader.GetOrdinal("system_prompt")) ? null : reader.GetString(reader.GetOrdinal("system_prompt")),
+                CodexReasoning = reader.IsDBNull(reader.GetOrdinal("codex_reasoning")) ? null : reader.GetString(reader.GetOrdinal("codex_reasoning")),
+                CodexEffort = reader.IsDBNull(reader.GetOrdinal("codex_effort")) ? null : reader.GetString(reader.GetOrdinal("codex_effort")),
+                CodexCompute = reader.IsDBNull(reader.GetOrdinal("codex_compute")) ? null : reader.GetString(reader.GetOrdinal("codex_compute")),
                 LastUsedAtUtc = reader.IsDBNull(reader.GetOrdinal("last_used_at")) ? null : reader.GetFieldValue<DateTimeOffset>(reader.GetOrdinal("last_used_at")),
                 SessionUpdatedAtUtc = reader.IsDBNull(reader.GetOrdinal("session_updated_at")) ? null : reader.GetFieldValue<DateTimeOffset>(reader.GetOrdinal("session_updated_at"))
             }

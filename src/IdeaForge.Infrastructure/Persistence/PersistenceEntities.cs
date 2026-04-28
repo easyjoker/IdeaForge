@@ -52,6 +52,12 @@ public sealed class AgentDataEntity
 
     public string? SystemPrompt { get; set; }
 
+    public string? CodexReasoning { get; set; }
+
+    public string? CodexEffort { get; set; }
+
+    public string? CodexCompute { get; set; }
+
     public DateTimeOffset? LastUsedAtUtc { get; set; }
 
     public DateTimeOffset? SessionUpdatedAtUtc { get; set; }
