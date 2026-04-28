@@ -49,12 +49,15 @@ param(
     [string]$SchemaPath,
 
     [Parameter()]
+    [ValidateSet("low", "medium", "high")]
     [string]$Reasoning,
 
     [Parameter()]
+    [ValidateSet("low", "medium", "high")]
     [string]$Effort,
 
     [Parameter()]
+    [ValidateSet("low", "medium", "high")]
     [string]$Compute,
 
     [Parameter()]

@@ -148,6 +148,12 @@ const statusColor: Record<AgentStatus | ClientResourceStatus, string> = {
   [AgentStatus.Archived]: "default"
 };
 
+const codexIntensityOptions = [
+  { label: "Low", value: "low" },
+  { label: "Medium", value: "medium" },
+  { label: "High", value: "high" }
+];
+
 export default function App() {
   return (
     <ConfigProvider
@@ -1575,13 +1581,13 @@ function CodexCliSettingsFields() {
   return (
     <>
       <Form.Item name="codexReasoning" label="Codex Reasoning" preserve={false} extra="Passed to Codex CLI as --reasoning; leave empty to use CLI defaults.">
-        <Input placeholder="for example: high" />
+        <Select allowClear placeholder="Use Codex default" options={codexIntensityOptions} />
       </Form.Item>
       <Form.Item name="codexEffort" label="Codex Effort" preserve={false} extra="Passed to Codex CLI as --effort; leave empty to use CLI defaults.">
-        <Input placeholder="for example: high" />
+        <Select allowClear placeholder="Use Codex default" options={codexIntensityOptions} />
       </Form.Item>
       <Form.Item name="codexCompute" label="Codex Compute" preserve={false} extra="Passed to Codex CLI as --compute; leave empty to use CLI defaults.">
-        <Input placeholder="for example: aggressive" />
+        <Select allowClear placeholder="Use Codex default" options={codexIntensityOptions} />
       </Form.Item>
     </>
   );

@@ -72,9 +72,9 @@ public sealed class AgentProfileService : IAgentProfileService
                 Provider = provider,
                 Model = string.IsNullOrWhiteSpace(request.Model) ? "gpt-5.4" : request.Model.Trim(),
                 SystemPrompt = NormalizeOptional(request.SystemPrompt),
-                CodexReasoning = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexReasoning) : null,
-                CodexEffort = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexEffort) : null,
-                CodexCompute = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexCompute) : null
+                CodexReasoning = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request.CodexReasoning, nameof(request.CodexReasoning)) : null,
+                CodexEffort = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request.CodexEffort, nameof(request.CodexEffort)) : null,
+                CodexCompute = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request.CodexCompute, nameof(request.CodexCompute)) : null
             }
         };
 
@@ -111,9 +111,9 @@ public sealed class AgentProfileService : IAgentProfileService
         existing.AgentData.Provider = provider;
         existing.AgentData.Model = string.IsNullOrWhiteSpace(request.Model) ? existing.AgentData.Model : request.Model.Trim();
         existing.AgentData.SystemPrompt = NormalizeOptional(request.SystemPrompt);
-        existing.AgentData.CodexReasoning = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexReasoning) : null;
-        existing.AgentData.CodexEffort = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexEffort) : null;
-        existing.AgentData.CodexCompute = provider == AgentProviderKind.Codex ? NormalizeOptional(request.CodexCompute) : null;
+        existing.AgentData.CodexReasoning = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request.CodexReasoning, nameof(request.CodexReasoning)) : null;
+        existing.AgentData.CodexEffort = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request.CodexEffort, nameof(request.CodexEffort)) : null;
+        existing.AgentData.CodexCompute = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request.CodexCompute, nameof(request.CodexCompute)) : null;
 
         var updated = await _repository.UpdateAsync(existing, cancellationToken);
         return Map(updated);
@@ -235,6 +235,19 @@ public sealed class AgentProfileService : IAgentProfileService
 
     private static string? NormalizeOptional(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string? NormalizeCodexIntensity(string? value, string parameterName)
+    {
+        var normalized = NormalizeOptional(value)?.ToLowerInvariant();
+        if (normalized is null)
+        {
+            return null;
+        }
+
+        return normalized is "low" or "medium" or "high"
+            ? normalized
+            : throw new ArgumentException($"{parameterName} must be low, medium, or high.", parameterName);
+    }
 
     private static AgentProviderKind ResolveProvider(AgentProviderKind requested, AgentProviderKind? existing) =>
         requested is AgentProviderKind.Copilot or AgentProviderKind.Codex

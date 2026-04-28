@@ -116,7 +116,7 @@ Run Codex and report execution back to the API:
   -Prompt "Summarize this repository" `
   -Reasoning high `
   -Effort high `
-  -Compute aggressive `
+  -Compute high `
   -Json `
   -EmployeeKey "docs-writer" `
   -AgentApiBaseUrl "http://localhost:5246"
@@ -139,6 +139,7 @@ Codex-specific tuning fields are available on AI person settings and `codex-agen
 - `codexReasoning` / `-Reasoning` maps to `codex exec --reasoning`.
 - `codexEffort` / `-Effort` maps to `codex exec --effort`.
 - `codexCompute` / `-Compute` maps to `codex exec --compute`.
+- All three fields accept only `low`, `medium`, or `high`.
 
 Model registries:
 

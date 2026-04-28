@@ -73,17 +73,17 @@ public sealed class CreateAgentProfileRequest
     public string? SystemPrompt { get; init; }
 
     /// <summary>
-    /// Codex CLI reasoning depth passed as --reasoning. Applies only when provider is Codex.
+    /// Codex CLI reasoning depth passed as --reasoning. Values: low, medium, high. Applies only when provider is Codex.
     /// </summary>
     public string? CodexReasoning { get; init; }
 
     /// <summary>
-    /// Codex CLI effort level passed as --effort. Applies only when provider is Codex.
+    /// Codex CLI effort level passed as --effort. Values: low, medium, high. Applies only when provider is Codex.
     /// </summary>
     public string? CodexEffort { get; init; }
 
     /// <summary>
-    /// Codex CLI compute level passed as --compute. Applies only when provider is Codex.
+    /// Codex CLI compute level passed as --compute. Values: low, medium, high. Applies only when provider is Codex.
     /// </summary>
     public string? CodexCompute { get; init; }
 }

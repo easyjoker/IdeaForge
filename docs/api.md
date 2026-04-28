@@ -34,7 +34,7 @@ Example body:
     "systemPrompt": "Answer in concise Traditional Chinese.",
     "codexReasoning": "high",
     "codexEffort": "high",
-    "codexCompute": "aggressive"
+    "codexCompute": "high"
   }
 }
 ```
@@ -44,7 +44,7 @@ Person kind values:
 - `1` = `Human`
 - `2` = `AI`
 
-The `agentSettings` object is used only when `kind` is `2` (`AI`). If omitted for an AI person, the API creates default Codex settings with `gpt-5.4`. `codexReasoning`, `codexEffort`, and `codexCompute` are optional Codex-only fields passed to Codex CLI as `--reasoning`, `--effort`, and `--compute`.
+The `agentSettings` object is used only when `kind` is `2` (`AI`). If omitted for an AI person, the API creates default Codex settings with `gpt-5.4`. `codexReasoning`, `codexEffort`, and `codexCompute` are optional Codex-only fields passed to Codex CLI as `--reasoning`, `--effort`, and `--compute`; each accepts only `low`, `medium`, or `high`.
 
 ## List People
 
@@ -134,7 +134,7 @@ Example body:
   "systemPrompt": "Answer in concise Traditional Chinese.",
   "codexReasoning": "high",
   "codexEffort": "high",
-  "codexCompute": "aggressive"
+  "codexCompute": "high"
 }
 ```
 
@@ -202,7 +202,7 @@ Example body:
   "systemPrompt": "Answer in concise Traditional Chinese.",
   "codexReasoning": "high",
   "codexEffort": "high",
-  "codexCompute": "aggressive"
+  "codexCompute": "high"
 }
 ```
 

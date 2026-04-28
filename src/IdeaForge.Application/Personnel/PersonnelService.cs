@@ -187,9 +187,9 @@ public sealed class PersonnelService : IPersonnelService
             Model = string.IsNullOrWhiteSpace(request?.Model) ? existing?.Model ?? "gpt-5.4" : request.Model.Trim(),
             SessionId = existing?.SessionId,
             SystemPrompt = request is null ? existing?.SystemPrompt : NormalizeOptional(request.SystemPrompt),
-            CodexReasoning = provider == AgentProviderKind.Codex ? request is null ? existing?.CodexReasoning : NormalizeOptional(request.CodexReasoning) : null,
-            CodexEffort = provider == AgentProviderKind.Codex ? request is null ? existing?.CodexEffort : NormalizeOptional(request.CodexEffort) : null,
-            CodexCompute = provider == AgentProviderKind.Codex ? request is null ? existing?.CodexCompute : NormalizeOptional(request.CodexCompute) : null,
+            CodexReasoning = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request is null ? existing?.CodexReasoning : request.CodexReasoning, nameof(request.CodexReasoning)) : null,
+            CodexEffort = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request is null ? existing?.CodexEffort : request.CodexEffort, nameof(request.CodexEffort)) : null,
+            CodexCompute = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request is null ? existing?.CodexCompute : request.CodexCompute, nameof(request.CodexCompute)) : null,
             LastUsedAtUtc = existing?.LastUsedAtUtc,
             SessionUpdatedAtUtc = existing?.SessionUpdatedAtUtc
         };
@@ -264,6 +264,19 @@ public sealed class PersonnelService : IPersonnelService
 
     private static string? NormalizeOptional(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string? NormalizeCodexIntensity(string? value, string parameterName)
+    {
+        var normalized = NormalizeOptional(value)?.ToLowerInvariant();
+        if (normalized is null)
+        {
+            return null;
+        }
+
+        return normalized is "low" or "medium" or "high"
+            ? normalized
+            : throw new ArgumentException($"{parameterName} must be low, medium, or high.", parameterName);
+    }
 
     private static List<string> NormalizeList(IEnumerable<string> values) =>
         values

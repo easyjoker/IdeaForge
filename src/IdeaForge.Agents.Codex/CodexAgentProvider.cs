@@ -130,13 +130,13 @@ public sealed class CodexAgentProvider : IAgentProvider
         string.IsNullOrWhiteSpace(request.Model) ? _options.DefaultModel : request.Model;
 
     private string? ResolveCodexReasoning(AgentExecutionRequest request) =>
-        string.IsNullOrWhiteSpace(request.CodexReasoning) ? _options.DefaultReasoning : request.CodexReasoning;
+        NormalizeCodexIntensity(string.IsNullOrWhiteSpace(request.CodexReasoning) ? _options.DefaultReasoning : request.CodexReasoning, nameof(request.CodexReasoning));
 
     private string? ResolveCodexEffort(AgentExecutionRequest request) =>
-        string.IsNullOrWhiteSpace(request.CodexEffort) ? _options.DefaultEffort : request.CodexEffort;
+        NormalizeCodexIntensity(string.IsNullOrWhiteSpace(request.CodexEffort) ? _options.DefaultEffort : request.CodexEffort, nameof(request.CodexEffort));
 
     private string? ResolveCodexCompute(AgentExecutionRequest request) =>
-        string.IsNullOrWhiteSpace(request.CodexCompute) ? _options.DefaultCompute : request.CodexCompute;
+        NormalizeCodexIntensity(string.IsNullOrWhiteSpace(request.CodexCompute) ? _options.DefaultCompute : request.CodexCompute, nameof(request.CodexCompute));
 
     private string ResolveWorkingDirectory(AgentExecutionRequest request) =>
         string.IsNullOrWhiteSpace(request.WorkingDirectory)
@@ -206,6 +206,19 @@ public sealed class CodexAgentProvider : IAgentProvider
         {
             arguments.Append(name).Append(' ').Append(Escape(value.Trim())).Append(' ');
         }
+    }
+
+    private static string? NormalizeCodexIntensity(string? value, string parameterName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var normalized = value.Trim().ToLowerInvariant();
+        return normalized is "low" or "medium" or "high"
+            ? normalized
+            : throw new ArgumentException($"{parameterName} must be low, medium, or high.", parameterName);
     }
 
     private static string Escape(string value) =>
