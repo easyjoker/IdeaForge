@@ -104,9 +104,7 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
             agentEntity.Model = agentData.Model;
             agentEntity.SessionId = agentData.SessionId;
             agentEntity.SystemPrompt = agentData.SystemPrompt;
-            agentEntity.CodexReasoning = agentData.CodexReasoning;
-            agentEntity.CodexEffort = agentData.CodexEffort;
-            agentEntity.CodexCompute = agentData.CodexCompute;
+            agentEntity.ProviderSettingsJson = JsonSerializer.Serialize(agentData.ProviderSettings, JsonOptions);
             agentEntity.LastUsedAtUtc = agentData.LastUsedAtUtc;
             agentEntity.SessionUpdatedAtUtc = agentData.SessionUpdatedAtUtc;
         }
@@ -327,9 +325,7 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
             Model = entity.Model,
             SessionId = entity.SessionId,
             SystemPrompt = entity.SystemPrompt,
-            CodexReasoning = entity.CodexReasoning,
-            CodexEffort = entity.CodexEffort,
-            CodexCompute = entity.CodexCompute,
+            ProviderSettings = DeserializeProviderSettings(entity.ProviderSettingsJson),
             LastUsedAtUtc = entity.LastUsedAtUtc,
             SessionUpdatedAtUtc = entity.SessionUpdatedAtUtc
         };
@@ -369,10 +365,14 @@ public sealed class EfCorePersonnelRepository : IPersonnelRepository
             Model = agentData.Model,
             SessionId = agentData.SessionId,
             SystemPrompt = agentData.SystemPrompt,
-            CodexReasoning = agentData.CodexReasoning,
-            CodexEffort = agentData.CodexEffort,
-            CodexCompute = agentData.CodexCompute,
+            ProviderSettingsJson = JsonSerializer.Serialize(agentData.ProviderSettings, JsonOptions),
             LastUsedAtUtc = agentData.LastUsedAtUtc,
             SessionUpdatedAtUtc = agentData.SessionUpdatedAtUtc
         };
+
+    private static Dictionary<string, string> DeserializeProviderSettings(string json)
+    {
+        var settings = JsonSerializer.Deserialize<Dictionary<string, string>>(json, JsonOptions) ?? [];
+        return new Dictionary<string, string>(settings, StringComparer.OrdinalIgnoreCase);
+    }
 }

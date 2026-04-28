@@ -71,9 +71,9 @@ public sealed class AgentConversationService : IAgentConversationService
                 .Where(static path => !string.IsNullOrWhiteSpace(path))
                 .Select(static path => path.Trim())
                 .ToArray(),
-            CodexReasoning = profile.AgentData.CodexReasoning,
-            CodexEffort = profile.AgentData.CodexEffort,
-            CodexCompute = profile.AgentData.CodexCompute,
+            CodexReasoning = AgentProviderSettings.Get(profile.AgentData.ProviderSettings, AgentProviderSettings.CodexReasoning),
+            CodexEffort = AgentProviderSettings.Get(profile.AgentData.ProviderSettings, AgentProviderSettings.CodexEffort),
+            CodexCompute = AgentProviderSettings.Get(profile.AgentData.ProviderSettings, AgentProviderSettings.CodexCompute),
             Metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["employeeId"] = profile.Employee.Id.ToString(),

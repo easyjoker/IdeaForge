@@ -183,7 +183,8 @@ Codex tuning:
 - `-Effort` maps to `codex exec --effort`.
 - `-Compute` maps to `codex exec --compute`.
 - All three values are limited to `low`, `medium`, or `high`.
-- The Web API stores the same values as `agentSettings.codexReasoning`, `agentSettings.codexEffort`, and `agentSettings.codexCompute` on AI people.
+- The Web API exposes the same values as `agentSettings.codexReasoning`, `agentSettings.codexEffort`, and `agentSettings.codexCompute` on AI people.
+- Internally, provider-specific values are stored in `agent_data.provider_settings` JSON so Codex and Copilot can grow independently.
 
 Copilot example:
 

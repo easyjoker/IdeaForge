@@ -86,9 +86,7 @@ public sealed class IdeaForgeDbContext : DbContext
         entity.Property(agentData => agentData.Model).HasColumnName("model").HasDefaultValue("gpt-5.4").IsRequired();
         entity.Property(agentData => agentData.SessionId).HasColumnName("session_id");
         entity.Property(agentData => agentData.SystemPrompt).HasColumnName("system_prompt");
-        entity.Property(agentData => agentData.CodexReasoning).HasColumnName("codex_reasoning");
-        entity.Property(agentData => agentData.CodexEffort).HasColumnName("codex_effort");
-        entity.Property(agentData => agentData.CodexCompute).HasColumnName("codex_compute");
+        entity.Property(agentData => agentData.ProviderSettingsJson).HasColumnName("provider_settings").HasColumnType("jsonb").HasDefaultValueSql("'{}'::jsonb").IsRequired();
         entity.Property(agentData => agentData.LastUsedAtUtc).HasColumnName("last_used_at");
         entity.Property(agentData => agentData.SessionUpdatedAtUtc).HasColumnName("session_updated_at");
     }

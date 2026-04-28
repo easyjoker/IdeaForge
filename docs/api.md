@@ -149,7 +149,7 @@ The API creates three records for an agent:
 
 - `person`: identity profile, always `AI` for this endpoint
 - `employee`: company work-assignment profile
-- `agent_data`: LLM provider, model, session state, and Codex CLI tuning settings
+- `agent_data`: LLM provider, model, session state, and provider-specific settings stored in `provider_settings` JSON
 
 ## List Agents
 

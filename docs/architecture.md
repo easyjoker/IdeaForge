@@ -115,9 +115,11 @@ Stores current runtime state for AI people only:
 - model
 - session id
 - system prompt
-- Codex CLI tuning settings: reasoning, effort, and compute
+- provider-specific settings in `provider_settings` JSON, for example Codex reasoning, effort, and compute
 - last used timestamp
 - session updated timestamp
+
+Provider-specific settings stay behind strong API DTOs. The UI renders provider-specific components, while the database keeps a single extensible JSON document instead of separate Codex and Copilot tables.
 
 `agent_executions`
 

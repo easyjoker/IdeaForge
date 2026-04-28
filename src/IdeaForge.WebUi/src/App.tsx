@@ -298,7 +298,6 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
   const watchedPersonKind = Form.useWatch("kind", personForm);
   const watchedPersonProvider = Form.useWatch("provider", personForm);
   const personFormIsAi = watchedPersonKind === PersonKind.Ai;
-  const personFormIsCodex = personFormIsAi && watchedPersonProvider === AgentProviderKind.Codex;
   const personSaveInFlightRef = useRef(false);
 
   useEffect(() => {
@@ -528,7 +527,7 @@ function PeoplePanel({ messageApi }: { messageApi: ReturnType<typeof message.use
               <Form.Item name="systemPrompt" label="System Prompt">
                 <Input.TextArea rows={3} placeholder="Optional instructions for this AI person." />
               </Form.Item>
-              {personFormIsCodex && <CodexCliSettingsFields />}
+              <ProviderSettingsForm provider={watchedPersonProvider} />
             </Card>
           )}
           <Button type="primary" htmlType="submit" block loading={savingPerson} disabled={savingPerson}>
@@ -799,7 +798,6 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
   const [agentForm] = Form.useForm<AgentFormValues>();
   const [chatForm] = Form.useForm<{ prompt: string }>();
   const watchedAgentProvider = Form.useWatch("provider", agentForm);
-  const agentFormIsCodex = watchedAgentProvider === AgentProviderKind.Codex;
 
   useEffect(() => {
     void loadAgents();
@@ -988,7 +986,7 @@ function AgentsPanel({ messageApi }: { messageApi: ReturnType<typeof message.use
           <Form.Item name="systemPrompt" label="System Prompt">
             <Input.TextArea rows={3} />
           </Form.Item>
-          {agentFormIsCodex && <CodexCliSettingsFields />}
+          <ProviderSettingsForm provider={watchedAgentProvider} />
           <Button type="primary" htmlType="submit" block>
             Create Agent
           </Button>
@@ -1577,7 +1575,19 @@ function buildAgentSettings(values: PersonFormValues) {
   };
 }
 
-function CodexCliSettingsFields() {
+function ProviderSettingsForm({ provider }: { provider?: AgentProviderKind }) {
+  if (provider === AgentProviderKind.Codex) {
+    return <CodexAgentSettingsForm />;
+  }
+
+  if (provider === AgentProviderKind.Copilot) {
+    return <CopilotAgentSettingsForm />;
+  }
+
+  return null;
+}
+
+function CodexAgentSettingsForm() {
   return (
     <>
       <Form.Item name="codexReasoning" label="Codex Reasoning" preserve={false} extra="Passed to Codex CLI as --reasoning; leave empty to use CLI defaults.">
@@ -1590,6 +1600,14 @@ function CodexCliSettingsFields() {
         <Select allowClear placeholder="Use Codex default" options={codexIntensityOptions} />
       </Form.Item>
     </>
+  );
+}
+
+function CopilotAgentSettingsForm() {
+  return (
+    <Card size="small" className="embedded-card">
+      <Text type="secondary">Copilot-specific settings are not required yet. The API stores future Copilot fields in provider settings without changing the main agent schema.</Text>
+    </Card>
   );
 }
 

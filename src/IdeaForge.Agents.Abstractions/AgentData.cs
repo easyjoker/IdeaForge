@@ -12,11 +12,7 @@ public sealed class AgentData
 
     public string? SystemPrompt { get; set; }
 
-    public string? CodexReasoning { get; set; }
-
-    public string? CodexEffort { get; set; }
-
-    public string? CodexCompute { get; set; }
+    public Dictionary<string, string> ProviderSettings { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     public DateTimeOffset? LastUsedAtUtc { get; set; }
 

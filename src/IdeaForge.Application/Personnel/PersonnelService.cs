@@ -187,9 +187,7 @@ public sealed class PersonnelService : IPersonnelService
             Model = string.IsNullOrWhiteSpace(request?.Model) ? existing?.Model ?? "gpt-5.4" : request.Model.Trim(),
             SessionId = existing?.SessionId,
             SystemPrompt = request is null ? existing?.SystemPrompt : NormalizeOptional(request.SystemPrompt),
-            CodexReasoning = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request is null ? existing?.CodexReasoning : request.CodexReasoning, nameof(request.CodexReasoning)) : null,
-            CodexEffort = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request is null ? existing?.CodexEffort : request.CodexEffort, nameof(request.CodexEffort)) : null,
-            CodexCompute = provider == AgentProviderKind.Codex ? NormalizeCodexIntensity(request is null ? existing?.CodexCompute : request.CodexCompute, nameof(request.CodexCompute)) : null,
+            ProviderSettings = BuildProviderSettings(provider, request, existing?.ProviderSettings),
             LastUsedAtUtc = existing?.LastUsedAtUtc,
             SessionUpdatedAtUtc = existing?.SessionUpdatedAtUtc
         };
@@ -245,9 +243,9 @@ public sealed class PersonnelService : IPersonnelService
             Model = agentData.Model,
             SessionId = agentData.SessionId,
             SystemPrompt = agentData.SystemPrompt,
-            CodexReasoning = agentData.CodexReasoning,
-            CodexEffort = agentData.CodexEffort,
-            CodexCompute = agentData.CodexCompute,
+            CodexReasoning = AgentProviderSettings.Get(agentData.ProviderSettings, AgentProviderSettings.CodexReasoning),
+            CodexEffort = AgentProviderSettings.Get(agentData.ProviderSettings, AgentProviderSettings.CodexEffort),
+            CodexCompute = AgentProviderSettings.Get(agentData.ProviderSettings, AgentProviderSettings.CodexCompute),
             LastUsedAtUtc = agentData.LastUsedAtUtc,
             SessionUpdatedAtUtc = agentData.SessionUpdatedAtUtc
         };
@@ -276,6 +274,38 @@ public sealed class PersonnelService : IPersonnelService
         return normalized is "low" or "medium" or "high"
             ? normalized
             : throw new ArgumentException($"{parameterName} must be low, medium, or high.", parameterName);
+    }
+
+    private static Dictionary<string, string> BuildProviderSettings(
+        AgentProviderKind provider,
+        UpsertAgentSettingsRequest? request,
+        IReadOnlyDictionary<string, string>? existing)
+    {
+        var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (provider != AgentProviderKind.Codex)
+        {
+            return settings;
+        }
+
+        AddOptional(settings, AgentProviderSettings.CodexReasoning, NormalizeCodexIntensity(
+            request is null ? AgentProviderSettings.Get(existing ?? new Dictionary<string, string>(), AgentProviderSettings.CodexReasoning) : request.CodexReasoning,
+            nameof(request.CodexReasoning)));
+        AddOptional(settings, AgentProviderSettings.CodexEffort, NormalizeCodexIntensity(
+            request is null ? AgentProviderSettings.Get(existing ?? new Dictionary<string, string>(), AgentProviderSettings.CodexEffort) : request.CodexEffort,
+            nameof(request.CodexEffort)));
+        AddOptional(settings, AgentProviderSettings.CodexCompute, NormalizeCodexIntensity(
+            request is null ? AgentProviderSettings.Get(existing ?? new Dictionary<string, string>(), AgentProviderSettings.CodexCompute) : request.CodexCompute,
+            nameof(request.CodexCompute)));
+
+        return settings;
+    }
+
+    private static void AddOptional(Dictionary<string, string> settings, string key, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            settings[key] = value;
+        }
     }
 
     private static List<string> NormalizeList(IEnumerable<string> values) =>
